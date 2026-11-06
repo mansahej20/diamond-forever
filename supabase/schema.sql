@@ -103,3 +103,44 @@ drop policy if exists "editors remove photos" on storage.objects;
 create policy "editors remove photos"
   on storage.objects for delete to authenticated
   using (bucket_id = 'piece-photos' and public.is_editor());
+
+-- ---------------------------------------------------------------------------
+-- Automatic editor rights for accounts made in the dashboard.
+--
+-- So the owner keeps one list, not two: Add user, and they can edit.
+--
+-- Why this does not hand the catalogue to strangers while sign-ups are open:
+--
+--   A dashboard "Add user" with "Auto Confirm User" ticked arrives with
+--   email_confirmed_at ALREADY SET on the INSERT.
+--
+--   Someone registering themselves does not. With mailer_autoconfirm off they
+--   are inserted unconfirmed, and confirmed later by an UPDATE — which this
+--   trigger does not watch. They never become an editor.
+--
+-- public.editors remains the revoke switch: delete the row to withdraw
+-- access without deleting the person's login.
+-- ---------------------------------------------------------------------------
+
+create or replace function public.grant_editor_on_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.email is not null and new.email_confirmed_at is not null then
+    insert into public.editors (email, note)
+    values (lower(new.email), 'auto-added when the account was created')
+    on conflict (email) do nothing;
+  end if;
+  return new;
+end;
+$$;
+
+revoke execute on function public.grant_editor_on_new_user() from anon, authenticated, public;
+
+drop trigger if exists grant_editor_on_new_user on auth.users;
+create trigger grant_editor_on_new_user
+  after insert on auth.users
+  for each row execute function public.grant_editor_on_new_user();

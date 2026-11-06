@@ -24,23 +24,28 @@ Row-level security decides this, not the interface:
 - **Anyone** may read the catalogue and see the photographs. It is a shop window.
 - **Only listed editors** may add, edit or delete pieces.
 
-"Listed" means the address appears in the `public.editors` table. Having a
-Supabase account is not enough on its own — so even if sign-ups are ever left
-open, a stranger who registers still cannot touch the catalogue.
+"Listed" means the address appears in the `public.editors` table.
 
 ### Adding someone who can edit
 
-Two steps, both in the Supabase dashboard:
+One step. **Authentication → Users → Add user**, give them an email and a
+password, and tick *Auto Confirm User*.
 
-1. **Authentication → Users → Add user.** Give them an email and a password,
-   and tick *Auto Confirm User* so they can sign in straight away.
-2. **SQL Editor**, to put that address on the allowlist:
+That is all. A trigger on the accounts table puts them on the editors list the
+moment the account is created, so there is no second list to remember.
 
-   ```sql
-   insert into public.editors (email, note)
-   values ('them@example.com', 'what they do')
-   on conflict (email) do nothing;
-   ```
+The trigger only fires for accounts that arrive already confirmed, which is
+what the dashboard does when *Auto Confirm User* is ticked. Someone who
+registers themselves arrives unconfirmed and is confirmed later by an update,
+which the trigger ignores — so a stranger who signs up never becomes an
+editor. If you forget to tick the box, the account can sign in but cannot
+edit; add the address by hand with the query below.
+
+```sql
+insert into public.editors (email, note)
+values ('them@example.com', 'what they do')
+on conflict (email) do nothing;
+```
 
 ### Removing someone
 
@@ -48,8 +53,17 @@ Two steps, both in the Supabase dashboard:
 delete from public.editors where email = 'them@example.com';
 ```
 
-They keep their account but lose the ability to change anything. Delete the
-user under Authentication → Users to stop them signing in at all.
+They keep their account but lose the ability to change anything, and the
+change takes effect the next time they load the page. Delete the user under
+Authentication → Users to stop them signing in at all — but note that
+deleting and recreating the same address makes them an editor again, because
+the trigger runs on the new account.
+
+### Everyone listed has the same powers
+
+There is one level of access. An editor can add, edit and delete any piece,
+upload and remove photographs, and change the editors list itself — including
+removing you. Only list people you would trust with all of that.
 
 ## Adding a piece
 
