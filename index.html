@@ -1,0 +1,2184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Diamond Forever — Sparkle for Eternity. The collection, turned in 3D.">
+<meta name="theme-color" content="#FFFFFF">
+
+<!-- installs to the iPhone home screen as a standalone app -->
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Diamond Forever">
+
+<style>
+  html{background:#FFFFFF}
+  /* keep content clear of the notch and home indicator once installed */
+  body{
+    padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .wrap{padding-top:env(safe-area-inset-top)}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script>
+<script src="./config.js"></script>
+</head>
+<body>
+<title>Diamond Forever</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Parisienne&display=swap">
+<style>
+:root{
+  /* Monochrome, from the logo: black on white, nothing else. */
+  --ground:#FFFFFF; --sunken:#F2F2F2;
+  --ink:#0E0E0E; --ink-2:#5C5C5C; --ink-3:#8E8E8E;
+  --rule:#DDDDDD; --rule-soft:#EDEDED;
+  --accent:#0E0E0E;          /* contrast is the accent; there is no brand hue */
+  --data:#4A4A4A;
+  --stage-top:#2E2E2E; --stage-mid:#161616; --stage-bot:#070707;
+  --on-stage:#F4F4F4; --on-stage-2:#9A9A9A;
+  --display:"Jost","Futura","Century Gothic",system-ui,sans-serif;
+  --body:"Karla","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --script:"Parisienne","Snell Roundhand",cursive;
+}
+/* Single theme, deliberately: the mark is black on white, so the page is too,
+   whatever the viewer's system is set to. Every colour is painted explicitly
+   above so nothing borrows the host's ground. */
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--body); font-size:15px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px 72px}
+[hidden]{display:none !important}
+
+/* the four-point sparkle lifted from the logo */
+.spark{display:inline-block; width:.62em; height:.62em; flex:none}
+.spark svg{display:block; width:100%; height:100%; fill:currentColor}
+
+/* ---------- masthead ---------- */
+.masthead{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:20px; flex-wrap:wrap;
+  padding:30px 0 20px; border-bottom:1px solid var(--rule);
+}
+.house{display:block; text-decoration:none}
+/* The supplied mark is black on white: it sits cleanly on the light ground and
+   inverts to white on black at night. Height is capped so a large upload can't
+   blow out the masthead. */
+.house-logo{display:block; height:62px; width:auto; max-width:min(340px,70vw); object-fit:contain}
+.house-lockup{
+  display:flex; align-items:center; gap:9px;
+  font-family:var(--display); font-weight:300; font-size:19px;
+  letter-spacing:.3em; text-transform:uppercase; line-height:1;
+}
+.house-mono{
+  font-family:var(--script); font-size:40px; letter-spacing:0;
+  text-transform:none; line-height:.8; margin:0 -2px; transform:translateY(-2px);
+}
+.house-sub{
+  display:block; margin-top:9px;
+  font-family:var(--display); font-weight:300; font-size:9.5px;
+  letter-spacing:.34em; text-transform:uppercase; color:var(--ink-3);
+}
+
+/* ---------- collection header ---------- */
+.collhead{
+  display:flex; align-items:flex-end; justify-content:space-between;
+  gap:24px; flex-wrap:wrap; padding:44px 0 28px;
+}
+.collhead h2{
+  font-family:var(--display); font-weight:200; font-size:33px;
+  margin:0; line-height:1.05; letter-spacing:.2em; text-transform:uppercase;
+}
+.collhead p{
+  font-family:var(--mono); font-size:10px; letter-spacing:.17em; text-transform:uppercase;
+  color:var(--ink-3); margin:11px 0 0;
+}
+.addbtn{
+  font-family:var(--display); font-size:9.5px; font-weight:400;
+  letter-spacing:.22em; text-transform:uppercase;
+  background:none; border:1px solid var(--rule); color:var(--ink-2);
+  padding:12px 18px; border-radius:0; cursor:pointer;
+}
+.addbtn:hover{border-color:var(--accent); color:var(--ink)}
+
+/* ---------- collection sections ---------- */
+.coll-section{margin-bottom:66px}
+.coll-section:last-child{margin-bottom:0}
+.section-head{
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  margin:0 0 26px; padding-bottom:14px; border-bottom:1px solid var(--rule);
+}
+.section-head h3{
+  display:flex; align-items:center; gap:12px;
+  font-family:var(--display); font-weight:200; font-size:25px;
+  margin:0; letter-spacing:.2em; text-transform:uppercase; color:var(--ink);
+}
+.section-head .count{
+  font-family:var(--mono); font-size:9.5px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--ink-3);
+}
+.section-head .blurb{
+  font-family:var(--body); font-size:13px; color:var(--ink-3);
+  margin-left:auto; text-align:right;
+}
+@media (max-width:720px){ .section-head .blurb{margin-left:0; text-align:left; flex-basis:100%} }
+
+/* ---------- catalogue grid ---------- */
+.grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:48px 34px}
+@media (max-width:720px){ .grid{grid-template-columns:minmax(0,1fr); gap:40px} }
+
+.card{display:block; text-decoration:none; color:inherit}
+.card:focus-visible{outline:2px solid var(--accent); outline-offset:6px}
+.card-img{
+  display:block; position:relative; aspect-ratio:1/1; overflow:hidden;
+  background:radial-gradient(118% 96% at 50% 6%, var(--stage-top) 0%, var(--stage-mid) 46%, var(--stage-bot) 100%);
+  border:1px solid var(--rule);
+}
+.card-img canvas,.card-img img{
+  position:absolute; inset:0; width:100%; height:100%; display:block; object-fit:cover;
+}
+.card-turn{
+  position:absolute; right:13px; bottom:12px; z-index:2;
+  display:flex; align-items:center; gap:6px;
+  font-family:var(--display); font-size:9px; font-weight:400;
+  letter-spacing:.24em; text-transform:uppercase;
+  color:var(--on-stage-2); opacity:0; transition:opacity .22s ease;
+}
+.card:hover .card-turn,.card:focus-visible .card-turn{opacity:1}
+.card-img::after{
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  box-shadow:inset 0 0 0 0 var(--on-stage); transition:box-shadow .22s ease;
+}
+.card:hover .card-img::after,.card:focus-visible .card-img::after{
+  box-shadow:inset 0 0 0 1px var(--on-stage);
+}
+.card-body{display:block; padding-top:17px}
+.card-eyebrow{
+  display:block; font-family:var(--mono); font-size:9px; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--ink-3); margin-bottom:8px;
+}
+.card-name{
+  display:block; font-family:var(--display); font-weight:300; font-size:18px;
+  line-height:1.3; letter-spacing:.15em; text-transform:uppercase;
+}
+.card-spec{
+  display:block; font-family:var(--mono); font-size:11px; color:var(--ink-3);
+  margin-top:9px; font-variant-numeric:tabular-nums;
+}
+.card-price{
+  display:block; font-family:var(--mono); font-size:12.5px; font-weight:500;
+  margin-top:10px; font-variant-numeric:tabular-nums; color:var(--ink);
+}
+.card.feature{grid-column:1/-1}
+.card.feature .card-img{aspect-ratio:16/7}
+.card.feature .card-name{font-size:21px}
+
+/* ---------- detail: breadcrumb ---------- */
+.crumb{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:18px; flex-wrap:wrap; padding:28px 0 4px;
+}
+.back,.step{
+  font-family:var(--display); font-size:9.5px; font-weight:400;
+  letter-spacing:.22em; text-transform:uppercase;
+  color:var(--ink-2); text-decoration:none;
+}
+.back:hover,.step:hover{color:var(--ink)}
+.steps-nav{display:flex; gap:22px; align-items:center}
+.step[aria-disabled="true"]{opacity:.3; pointer-events:none}
+
+/* ---------- detail layout ---------- */
+.vitrine{
+  display:grid; grid-template-columns:minmax(0,1fr) 336px;
+  gap:44px; align-items:start; padding-top:24px;
+}
+@media (max-width:880px){ .vitrine{grid-template-columns:minmax(0,1fr); gap:30px} }
+
+.modes{display:flex; gap:2px; margin-bottom:15px; flex-wrap:wrap}
+.mode{
+  font-family:var(--display); font-size:9.5px; font-weight:400;
+  letter-spacing:.22em; text-transform:uppercase;
+  background:none; border:0; border-bottom:1px solid transparent;
+  color:var(--ink-3); padding:7px 14px 8px; cursor:pointer; border-radius:0;
+}
+.mode:hover:not(:disabled){color:var(--ink)}
+.mode[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+.mode:disabled{opacity:.3; cursor:not-allowed}
+
+.stage{
+  position:relative; aspect-ratio:1/1; width:100%;
+  background:radial-gradient(118% 96% at 50% 6%, var(--stage-top) 0%, var(--stage-mid) 46%, var(--stage-bot) 100%);
+  border:1px solid var(--rule);
+  overflow:hidden; cursor:grab; touch-action:none;
+}
+.stage:active{cursor:grabbing}
+.stage:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.stage canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+#flat{display:none}
+.stage.flatmode #gl{visibility:hidden}
+.stage.flatmode #flat{display:block}
+
+.hint,.readout{
+  position:absolute; bottom:13px; z-index:3; pointer-events:none;
+  font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--on-stage-2);
+}
+.hint{left:15px}
+.readout{right:15px; font-variant-numeric:tabular-nums}
+.dots{
+  position:absolute; left:50%; transform:translateX(-50%); bottom:12px; z-index:3;
+  display:none; gap:8px;
+}
+.stage.snapmode .dots{display:flex}
+.dots button{
+  width:7px; height:7px; padding:0; border-radius:50%; cursor:pointer;
+  border:1px solid var(--on-stage-2); background:none;
+}
+.dots button[aria-current="true"]{background:var(--on-stage); border-color:var(--on-stage)}
+.busy{
+  position:absolute; inset:0; z-index:4; display:none;
+  align-items:center; justify-content:center; flex-direction:column; gap:13px;
+  background:rgba(7,7,7,.78);
+  font-family:var(--display); font-size:9.5px; font-weight:400;
+  letter-spacing:.24em; text-transform:uppercase; color:var(--on-stage);
+}
+.busy.on{display:flex}
+.bar{width:140px; height:1px; background:rgba(244,244,244,.22)}
+.bar i{display:block; height:100%; width:0; background:var(--on-stage); transition:width .12s linear}
+
+/* ---------- spec column ---------- */
+.spec{min-width:0}
+.eyebrow{
+  display:flex; align-items:center; gap:8px;
+  font-family:var(--mono); font-size:9px; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--ink-3); margin:0 0 11px;
+}
+.spec h2{
+  font-family:var(--display); font-weight:200; font-size:25px; line-height:1.25;
+  margin:0 0 10px; letter-spacing:.17em; text-transform:uppercase; text-wrap:balance;
+}
+.price{
+  font-family:var(--mono); font-size:15px; font-weight:500; margin:0;
+  font-variant-numeric:tabular-nums;
+}
+.price small{
+  display:block; font-family:var(--mono); font-size:9px; font-weight:400;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin-top:5px;
+}
+/* divider carrying the logo's sparkle */
+.hair{
+  display:flex; align-items:center; gap:11px; margin:22px 0 20px;
+  color:var(--ink-3);
+}
+.hair::before,.hair::after{content:""; height:1px; background:var(--rule); flex:1}
+.plate{display:grid; grid-template-columns:auto 1fr; gap:10px 18px; margin:0}
+.plate dt{
+  font-family:var(--mono); font-size:9px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-3); padding-top:2px;
+}
+.plate dd{
+  margin:0; font-family:var(--mono); font-size:12px; line-height:1.45;
+  font-variant-numeric:tabular-nums;
+}
+.plate dd.num{color:var(--data)}
+.note{font-size:13.5px; line-height:1.64; color:var(--ink-2); margin:22px 0 0; max-width:42ch}
+.note b{color:var(--ink); font-weight:500}
+.fail{padding:16px; border:1px solid var(--rule); font-size:13.5px; color:var(--ink-2); margin-top:14px}
+
+.foot{
+  margin-top:48px; padding-top:20px; border-top:1px solid var(--rule);
+  font-family:var(--mono); font-size:9px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--ink-3); display:flex; gap:22px; flex-wrap:wrap;
+}
+@media (prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important} }
+
+/* ---------- piece editor ---------- */
+.form-head{padding:40px 0 10px; max-width:62ch}
+.form-head h2{
+  font-family:var(--display); font-weight:200; font-size:31px; margin:0;
+  letter-spacing:.18em; text-transform:uppercase;
+}
+.form-head p{font-size:14px; color:var(--ink-2); margin:14px 0 0; line-height:1.6}
+.notice{
+  margin:20px 0 0; padding:14px 16px; border:1px solid var(--rule);
+  font-size:13.5px; color:var(--ink-2); line-height:1.6;
+}
+.notice b{color:var(--ink); font-weight:500}
+.notice.bad{border-color:var(--ink); color:var(--ink)}
+
+.pform{margin-top:34px; max-width:780px}
+.fieldset{
+  border:0; padding:0 0 36px; margin:0 0 36px;
+  border-bottom:1px solid var(--rule-soft);
+}
+.fieldset:last-of-type{border-bottom:0}
+.fieldset h3{
+  display:flex; align-items:baseline; gap:13px; margin:0 0 6px;
+  font-family:var(--display); font-weight:300; font-size:17px;
+  letter-spacing:.2em; text-transform:uppercase; color:var(--ink);
+}
+.fs-n{font-family:var(--mono); font-size:10px; letter-spacing:.1em; color:var(--ink-3)}
+.fs-hint{font-size:13px; color:var(--ink-3); margin:0 0 18px; line-height:1.6}
+.fs-hint b{color:var(--ink-2); font-weight:500}
+
+.dropzone{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:7px; padding:38px 20px; text-align:center; cursor:pointer;
+  border:1px dashed var(--rule); background:none; color:var(--ink-2);
+}
+.dropzone:hover,.dropzone.over{border-color:var(--ink); color:var(--ink)}
+.dropzone:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+.dropzone strong{
+  font-family:var(--display); font-weight:400; font-size:12px;
+  letter-spacing:.2em; text-transform:uppercase;
+}
+.dropzone span{font-size:12.5px; color:var(--ink-3)}
+
+.framestrip{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px}
+.framestrip:empty{display:none}
+.fchip{position:relative; width:84px}
+.fchip-img{
+  display:block; width:84px; height:84px; object-fit:cover;
+  background:var(--stage-bot); border:1px solid var(--rule);
+}
+.fchip-no{
+  position:absolute; top:-7px; left:-7px; z-index:2;
+  width:19px; height:19px; padding:0; cursor:pointer; line-height:1;
+  font-family:var(--mono); font-size:10px;
+  background:var(--ground); color:var(--ink); border:1px solid var(--rule);
+}
+.fchip-no:hover{border-color:var(--ink)}
+.fchip-ord{
+  display:flex; margin-top:5px; gap:4px; align-items:center;
+  font-family:var(--mono); font-size:9px; color:var(--ink-3);
+}
+.fchip-ord button{
+  flex:1; padding:3px 0; cursor:pointer; line-height:1;
+  font-family:var(--mono); font-size:10px;
+  background:none; color:var(--ink-2); border:1px solid var(--rule);
+}
+.fchip-ord button:hover:not(:disabled){border-color:var(--ink); color:var(--ink)}
+.fchip-ord button:disabled{opacity:.3; cursor:not-allowed}
+
+.fgrid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+@media (max-width:640px){ .fgrid{grid-template-columns:1fr} }
+.field{display:flex; flex-direction:column; gap:7px; min-width:0}
+.field.f-wide{grid-column:1/-1}
+.field > span{
+  font-family:var(--mono); font-size:9px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--ink-3);
+}
+.field > em{font-style:normal; font-size:12px; color:var(--ink-3)}
+.field input,.field select,.field textarea,.spec-editor input{
+  font-family:var(--body); font-size:14px; color:var(--ink);
+  background:var(--ground); border:1px solid var(--rule); border-radius:0;
+  padding:10px 12px; width:100%; min-width:0;
+}
+.field textarea{resize:vertical; line-height:1.6}
+.field input:focus,.field select:focus,.field textarea:focus,.spec-editor input:focus{
+  outline:none; border-color:var(--ink);
+}
+.field input.bad,.spec-editor input.bad{border-color:var(--ink); background:var(--sunken)}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
+
+.spec-editor{display:flex; flex-direction:column; gap:9px; margin-bottom:16px}
+.specrow{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) auto auto; gap:9px; align-items:center}
+@media (max-width:640px){ .specrow{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto auto} }
+.specrow .numtog{
+  font-family:var(--mono); font-size:10px; cursor:pointer; padding:9px 11px;
+  background:none; color:var(--ink-3); border:1px solid var(--rule); line-height:1;
+}
+.specrow .numtog[aria-pressed="true"]{color:var(--ink); border-color:var(--ink)}
+.specrow .rowdel{
+  font-family:var(--mono); font-size:11px; cursor:pointer; padding:9px 11px;
+  background:none; color:var(--ink-3); border:1px solid var(--rule); line-height:1;
+}
+.specrow .rowdel:hover{color:var(--ink); border-color:var(--ink)}
+
+.formactions{display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding-top:8px}
+.btn{
+  font-family:var(--display); font-size:10px; font-weight:400;
+  letter-spacing:.22em; text-transform:uppercase; text-decoration:none;
+  padding:13px 22px; border:1px solid var(--rule); background:none;
+  color:var(--ink-2); cursor:pointer; border-radius:0; display:inline-block;
+}
+.btn:hover{border-color:var(--ink); color:var(--ink)}
+.btn-primary{background:var(--ink); border-color:var(--ink); color:var(--ground)}
+.btn-primary:hover{opacity:.84; color:var(--ground)}
+.btn-primary:disabled{opacity:.4; cursor:not-allowed}
+.btn-danger{margin-left:auto; color:var(--ink-3)}
+.btn-danger:hover{border-color:var(--ink); color:var(--ink)}
+.btn-quiet{padding:9px 15px; font-size:9.5px}
+
+/* sample marker + edit affordance on cards */
+.card-tag{
+  display:inline-block; margin-left:9px; padding:2px 7px; vertical-align:2px;
+  font-family:var(--mono); font-size:8.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-3); border:1px solid var(--rule);
+}
+.samplebar{
+  display:flex; justify-content:flex-end; margin:-10px 0 26px;
+}
+.samplebar button{
+  font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; text-transform:uppercase;
+  background:none; border:0; border-bottom:1px solid var(--rule);
+  color:var(--ink-3); padding:3px 0; cursor:pointer;
+}
+.samplebar button:hover{color:var(--ink); border-bottom-color:var(--ink)}
+.detail-actions{
+  display:flex; gap:16px; align-items:center; flex-wrap:wrap;
+  margin-top:48px; padding-top:28px; border-top:1px solid var(--rule);
+}
+.detail-actions p{
+  margin:0; font-size:13px; line-height:1.6; color:var(--ink-3); max-width:44ch;
+}
+.detail-actions .btn{flex:none}
+.empty-line{
+  padding:30px 0; font-size:13.5px; color:var(--ink-3); line-height:1.7;
+  grid-column:1/-1;
+}
+.empty-line a{color:var(--ink); text-underline-offset:3px}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.150.1/three.min.js"></script>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <a class="house" href="#/" id="homeLink">
+        <img class="house-logo" id="houseLogo" src="logo.png" alt="Diamond Forever — Sparkle for Eternity" hidden>
+        <span class="house-lockup" id="houseLockup">
+          <span>Diamond</span><span class="house-mono">df</span><span>Forever</span>
+        </span>
+      </a>
+      <span class="house-sub" id="houseSub">Sparkle for Eternity</span>
+    </div>
+    <button class="btn btn-quiet" id="authBtn" type="button" hidden>Sign in to edit</button>
+  </header>
+
+  <!-- ========== VIEW: COLLECTION ========== -->
+  <section id="viewCollection">
+    <div class="collhead">
+      <div>
+        <h2>The Collection</h2>
+        <p id="collCount">Two collections &middot; hover to turn, click for detail</p>
+      </div>
+      <button class="addbtn" id="addBtn" type="button">+ Add your piece</button>
+    </div>
+    <div id="sections"></div>
+
+  </section>
+
+  <!-- ========== VIEW: DETAIL ========== -->
+  <section id="viewDetail" hidden>
+    <div class="crumb">
+      <a class="back" href="#/">&larr; Collection</a>
+      <nav class="steps-nav" aria-label="Browse pieces">
+        <a class="step" id="prevLink" href="#/">&larr; Previous</a>
+        <a class="step" id="nextLink" href="#/">Next &rarr;</a>
+      </nav>
+    </div>
+
+    <div class="vitrine">
+      <div>
+        <div class="modes" role="tablist" aria-label="Viewing mode">
+          <button class="mode" role="tab" data-mode="model" aria-selected="true">3D model</button>
+          <button class="mode" role="tab" data-mode="spin" aria-selected="false">Spin 360&deg;</button>
+        </div>
+
+        <div class="stage" id="stage" tabindex="0" role="application"
+             aria-label="Jewellery viewer. Drag to turn, scroll to zoom, arrow keys also work.">
+          <canvas id="gl"></canvas>
+          <canvas id="flat"></canvas>
+          <div class="hint" id="hint">Drag to turn &middot; scroll to zoom</div>
+          <div class="readout" id="readout"></div>
+          <div class="dots" id="dots"></div>
+          <div class="busy" id="busy">
+            <span id="busyLabel">Working</span>
+            <span class="bar"><i id="busyBar"></i></span>
+          </div>
+        </div>
+        <div class="fail" id="fail" hidden>
+          This browser could not start WebGL, so the modelled pieces can&rsquo;t render.
+          Your own photos and video still work.
+        </div>
+      </div>
+
+      <aside class="spec" id="spec"></aside>
+    </div>
+
+    <div class="detail-actions" id="detailActions"></div>
+  </section>
+
+
+  <!-- ========== VIEW: PIECE EDITOR ========== -->
+  <section id="viewForm" hidden>
+    <div class="crumb">
+      <a class="back" href="#/">&larr; Collection</a>
+      <span class="step" id="formMode">New piece</span>
+    </div>
+
+    <div class="form-head">
+      <h2 id="formTitle">Add a piece</h2>
+      <p id="formLead">Photographs first &mdash; the viewer turns them into a spin.
+      Then the details that sit beside it on the piece&rsquo;s own page.</p>
+    </div>
+
+    <div class="notice" id="formNotice" hidden></div>
+
+    <form id="pieceForm" class="pform" novalidate>
+      <section class="fieldset">
+        <h3><span class="fs-n">01</span> Photographs</h3>
+        <p class="fs-hint" id="frameVerdict">Nothing added yet.</p>
+        <div class="dropzone" id="dropzone" tabindex="0" role="button"
+             aria-label="Add photographs or a video">
+          <strong>Drop photographs or a video</strong>
+          <span>or click to choose &middot; 24 frames gives a smooth spin</span>
+        </div>
+        <div class="framestrip" id="framestrip"></div>
+      </section>
+
+      <section class="fieldset">
+        <h3><span class="fs-n">02</span> The piece</h3>
+        <div class="fgrid">
+          <label class="field f-wide"><span>Name</span>
+            <input id="fName" type="text" placeholder="Aurea Court Band" autocomplete="off"></label>
+          <label class="field"><span>Collection</span>
+            <select id="fLine"><option value="gold">Gold</option><option value="diamond">Diamond</option></select></label>
+          <label class="field"><span>Price</span>
+            <input id="fPrice" type="text" placeholder="&#3647; 39,500" autocomplete="off"></label>
+          <label class="field f-wide"><span>Price note</span>
+            <input id="fPriceNote" type="text" placeholder="Incl. VAT &middot; made to order, 3 weeks" autocomplete="off"></label>
+          <label class="field f-wide"><span>Summary line</span>
+            <input id="fSummary" type="text" placeholder="18K yellow gold &middot; 4.0 mm &middot; US 7" autocomplete="off">
+            <em>Sits under the name in the catalogue.</em></label>
+        </div>
+      </section>
+
+      <section class="fieldset">
+        <h3><span class="fs-n">03</span> Description</h3>
+        <label class="field"><span class="sr">Description</span>
+          <textarea id="fNote" rows="4" placeholder="What a customer should know about this piece."></textarea>
+          <em>One short paragraph. Wrap a phrase in **asterisks** to set it bold.</em></label>
+      </section>
+
+      <section class="fieldset">
+        <h3><span class="fs-n">04</span> Specification</h3>
+        <p class="fs-hint">The hallmark plate beside the viewer. Tick <b>N</b> on
+        measurements and weights so they set in the figure colour.</p>
+        <div class="spec-editor" id="specRows"></div>
+        <button type="button" class="btn btn-quiet" id="addSpecRow">+ Add row</button>
+      </section>
+
+      <div class="formactions">
+        <button type="submit" class="btn btn-primary" id="saveBtn">Save piece</button>
+        <a class="btn" href="#/">Cancel</a>
+        <button type="button" class="btn btn-danger" id="deleteBtn" hidden>Delete piece</button>
+      </div>
+    </form>
+  </section>
+
+  <input type="file" id="pick" accept="image/*,video/*" multiple hidden>
+
+  <div class="foot">
+    <span>Diamond Forever</span>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var SPARK = '<span class="spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 0C12.6 8.2 15.8 11.4 24 12C15.8 12.6 12.6 15.8 12 24C11.4 15.8 8.2 12.6 0 12C8.2 11.4 11.4 8.2 12 0Z"/></svg></span>';
+var REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
+var SPIN_FRAMES = 24;
+var CARD_FRAMES = 8;
+var CARD_SIZE   = 320;
+
+/* ============================ catalogue ============================ */
+var LINES = [
+  { id:"gold",    name:"Gold",
+    blurb:"Solid 18K, no stones — priced on weight and workmanship" },
+  { id:"diamond", name:"Diamond",
+    blurb:"Certified stones, graded and set by hand" }
+];
+
+var PIECES = [
+  /* ---- Gold ---- */
+  { id:"band", line:"gold", collection:"Gold", name:"Aurea Court Band",
+    price:"฿ 39,500", priceNote:"Incl. VAT · sized to order, 2 weeks",
+    summary:"18K yellow gold · 4.0 mm · US 7",
+    note:"A <b>court profile</b> is domed on both the inside and the outside, so it rolls over the finger instead of catching on it. It costs more gold than a flat band of the same width — which is most of what you are paying for.",
+    spec:[
+      ["Metal","18K / 750 yellow gold",0],
+      ["Profile","Court, comfort-fit",0],
+      ["Width","4.0 mm",1],
+      ["Depth","1.9 mm",1],
+      ["Size","US 7 · ø 17.35 mm",1],
+      ["Finish","High polish",0],
+      ["Weight","6.4 g",1],
+      ["Hallmark","750 · maker's mark",0],
+      ["Reference","DF-G-0210",0]
+    ]},
+  { id:"hoops", line:"gold", collection:"Gold", name:"Meridian Hoops",
+    price:"฿ 52,000", priceNote:"Incl. VAT · pair",
+    summary:"18K rose gold · ø 24 mm · 4.6 g",
+    note:"Hollow tube, not solid wire — which is how a 24 mm hoop stays light enough to wear all day. The <b>hinged snap post</b> closes without a separate back to lose.",
+    spec:[
+      ["Metal","18K / 750 rose gold",0],
+      ["Outer ø","24.0 mm",1],
+      ["Tube","2.4 mm round, hollow",1],
+      ["Closure","Hinged snap post",0],
+      ["Finish","High polish",0],
+      ["Weight","4.6 g the pair",1],
+      ["Hallmark","750 · maker's mark",0],
+      ["Reference","DF-G-0318",0]
+    ]},
+
+  /* ---- Diamond ---- */
+  { id:"bracelet", line:"diamond", collection:"Diamond", feature:true,
+    name:"Riviera Line Bracelet",
+    price:"฿ 595,000", priceNote:"Incl. VAT · sizing to order",
+    summary:"Platinum 950 · 3.15 ct TCW · 178 mm",
+    note:"Every link is individually articulated, so the line lies flat on the wrist instead of standing proud. A <b>figure-eight safety</b> backs up the box clasp.",
+    spec:[
+      ["Metal","Platinum 950",0],
+      ["Stones","42 × round brilliant",1],
+      ["Total weight","3.15 ct TCW",1],
+      ["Colour / clarity","F–G / VS",0],
+      ["Length","178 mm",1],
+      ["Width","2.9 mm",1],
+      ["Clasp","Box · figure-eight safety",0],
+      ["Weight","11.8 g",1],
+      ["Hallmark","PT950",0],
+      ["Reference","DF-D-0112",0]
+    ]},
+  { id:"solitaire", line:"diamond", collection:"Diamond", name:"Aurora Solitaire",
+    price:"฿ 145,000", priceNote:"Incl. VAT · made to order, 3 weeks",
+    summary:"18K yellow gold · 0.74 ct · US 6½",
+    note:"A <b>four-claw basket</b> lifts the stone clear of the band so light enters the pavilion from beneath — the reason a solitaire fires more than a bezel of the same weight.",
+    spec:[
+      ["Metal","18K / 750 yellow gold",0],
+      ["Centre stone","Round brilliant · G / VS1",0],
+      ["Carat","0.74 ct",1],
+      ["Stone","5.76 × 5.76 × 3.51 mm",1],
+      ["Setting","Four-claw basket",0],
+      ["Size","US 6½ · ø 16.92 mm",1],
+      ["Band","2.1 mm half-round",1],
+      ["Weight","3.2 g",1],
+      ["Hallmark","750 · maker's mark",0],
+      ["Reference","DF-D-0174",0]
+    ]},
+  { id:"pendant", line:"diamond", collection:"Diamond", name:"Nilaya Halo Pendant",
+    price:"฿ 128,000", priceNote:"Incl. VAT · chain included",
+    summary:"Platinum 950 · 0.60 ct TCW · 450 mm",
+    note:"Sixteen <b>1.1 mm pavé</b> stones ring the centre. A halo reads about half a carat larger than the centre stone alone — the oldest honest trick in the trade.",
+    spec:[
+      ["Metal","Platinum 950",0],
+      ["Centre stone","Round brilliant · F / VVS2",0],
+      ["Centre carat","0.42 ct",1],
+      ["Halo","16 × 1.10 mm · 0.18 ct",1],
+      ["Total weight","0.60 ct TCW",1],
+      ["Chain","450 mm cable · 1.1 mm",1],
+      ["Bail","Fixed, 3.4 mm interior",1],
+      ["Weight","4.1 g",1],
+      ["Hallmark","PT950",0],
+      ["Reference","DF-D-0042",0]
+    ]}
+];
+
+/* ============================ dom ============================ */
+var $ = function(id){ return document.getElementById(id); };
+var viewColl = $("viewCollection"), viewDet = $("viewDetail");
+var sectionsEl = $("sections"), collCount = $("collCount");
+var stageEl = $("stage"), glC = $("gl"), flatC = $("flat");
+var fctx = flatC.getContext("2d");
+var hintEl = $("hint"), readEl = $("readout"), dotsEl = $("dots");
+var busyEl = $("busy"), busyLbl = $("busyLabel"), busyBar = $("busyBar");
+var specEl = $("spec"), pickEl = $("pick"), failEl = $("fail");
+var prevLink = $("prevLink"), nextLink = $("nextLink");
+var addBtn = $("addBtn"), detailActions = $("detailActions");
+var authBtn = $("authBtn");
+
+/* ============================ state ============================ */
+var view = "collection";
+var mode = "model";
+var subject = null;
+
+/* One storage backend, chosen at boot: Supabase when configured (the deployed
+   app), the claude.ai artifact runtime when running inside one. Null means
+   read-only — the catalogue still renders, nothing can be saved. */
+var Backend = null;
+var canEdit = false;
+var savedPieces = [];
+var savedFrameCache = {};
+var dbReady = false, dbErrorMsg = "";
+var yaw = 0.62, pitch = 0.20, dist = 5, fitDist = 5;
+var frame = 0, fade = 1, fadeFrom = 0;
+var zoom = 1;
+var autoSpin = !REDUCE;
+var gfxReady = false;
+var spinCache = {};
+
+/* ============================ three ============================ */
+var renderer, scene, camera, MAT, GEO, groups = {};
+
+function envTexture(){
+  var c = document.createElement("canvas"); c.width = 1024; c.height = 512;
+  var x = c.getContext("2d");
+  var g = x.createLinearGradient(0,0,0,512);
+  g.addColorStop(0,"#6a6a6a"); g.addColorStop(0.42,"#212121");
+  g.addColorStop(0.52,"#0e0e0e"); g.addColorStop(1,"#272727");
+  x.fillStyle = g; x.fillRect(0,0,1024,512);
+  function blob(cx,cy,rx,ry,col){
+    x.save(); x.translate(cx,cy); x.scale(rx/100, ry/100);
+    var rg = x.createRadialGradient(0,0,0,0,0,100);
+    rg.addColorStop(0,col); rg.addColorStop(1,"rgba(0,0,0,0)");
+    x.fillStyle = rg; x.beginPath(); x.arc(0,0,100,0,Math.PI*2); x.fill(); x.restore();
+  }
+  blob(512, 52, 420, 90, "rgba(255,255,255,0.98)");
+  blob(236,148, 180, 96, "rgba(248,248,248,0.82)");
+  blob(760,168, 150, 84, "rgba(232,238,245,0.66)");
+  blob(120,392, 210,130, "rgba(168,168,168,0.40)");
+  blob(880,420, 170,110, "rgba(120,120,120,0.32)");
+  var t = new THREE.CanvasTexture(c);
+  t.mapping = THREE.EquirectangularReflectionMapping;
+  t.encoding = THREE.sRGBEncoding;
+  return t;
+}
+function contactShadow(){
+  var c = document.createElement("canvas"); c.width = c.height = 256;
+  var x = c.getContext("2d");
+  var rg = x.createRadialGradient(128,128,0,128,128,128);
+  rg.addColorStop(0,"rgba(0,0,0,0.62)"); rg.addColorStop(0.45,"rgba(0,0,0,0.26)");
+  rg.addColorStop(1,"rgba(0,0,0,0)");
+  x.fillStyle = rg; x.fillRect(0,0,256,256);
+  var m = new THREE.Mesh(new THREE.PlaneGeometry(6,6),
+    new THREE.MeshBasicMaterial({ map:new THREE.CanvasTexture(c), transparent:true, depthWrite:false }));
+  m.rotation.x = -Math.PI/2; m.position.y = -1.62;
+  return m;
+}
+function materials(){
+  return {
+    gold: new THREE.MeshPhysicalMaterial({ color:0xd6ac6e, metalness:1, roughness:0.17,
+            envMapIntensity:1.55, clearcoat:0.3, clearcoatRoughness:0.22 }),
+    goldSoft: new THREE.MeshPhysicalMaterial({ color:0xd6ac6e, metalness:1, roughness:0.16,
+            envMapIntensity:1.6, clearcoat:0.3, clearcoatRoughness:0.22,
+            side:THREE.DoubleSide }),
+    rose: new THREE.MeshPhysicalMaterial({ color:0xdfa48d, metalness:1, roughness:0.19,
+            envMapIntensity:1.5, clearcoat:0.3, clearcoatRoughness:0.22 }),
+    plat: new THREE.MeshPhysicalMaterial({ color:0xdfe3e7, metalness:1, roughness:0.12,
+            envMapIntensity:1.7, clearcoat:0.35, clearcoatRoughness:0.14 }),
+    gem:  new THREE.MeshPhysicalMaterial({ color:0xffffff, metalness:0, roughness:0.02,
+            transmission:0.92, thickness:0.42, ior:2.42, transparent:true,
+            envMapIntensity:3.1, clearcoat:1, clearcoatRoughness:0.02, flatShading:true }),
+    gemFace:new THREE.MeshPhysicalMaterial({ color:0xf4f9ff, metalness:0, roughness:0.02,
+            transmission:0.45, thickness:0.18, ior:2.42, transparent:true,
+            envMapIntensity:4.2, clearcoat:1, clearcoatRoughness:0.02, flatShading:true }),
+    spark:new THREE.MeshPhysicalMaterial({ color:0xfbfdff, metalness:0.1, roughness:0.03,
+            envMapIntensity:3.2, clearcoat:1, clearcoatRoughness:0.02, flatShading:true })
+  };
+}
+function brilliant(R, mat){
+  var m = mat || MAT.gem;
+  var g = new THREE.Group();
+  var crown = new THREE.Mesh(new THREE.CylinderGeometry(R*0.58, R, R*0.52, 16), m);
+  crown.position.y = R*0.30; g.add(crown);
+  g.add(new THREE.Mesh(new THREE.CylinderGeometry(R, R, R*0.09, 16), m));
+  var pav = new THREE.Mesh(new THREE.ConeGeometry(R, R*1.3, 16), m);
+  pav.rotation.x = Math.PI; pav.position.y = -R*0.69; g.add(pav);
+  return g;
+}
+var BUILD = {
+  // Court profile: domed outside AND inside, revolved as one closed cross-section.
+  band: function(){
+    var pts = [
+      new THREE.Vector2(0.970,-0.150), new THREE.Vector2(1.020,-0.158),
+      new THREE.Vector2(1.072,-0.108), new THREE.Vector2(1.095,-0.040),
+      new THREE.Vector2(1.095, 0.040), new THREE.Vector2(1.072, 0.108),
+      new THREE.Vector2(1.020, 0.158), new THREE.Vector2(0.970, 0.150),
+      new THREE.Vector2(0.970,-0.150)
+    ];
+    var m = new THREE.Mesh(new THREE.LatheGeometry(pts, 128), MAT.goldSoft);
+    m.rotation.x = Math.PI/2;
+    var g = new THREE.Group(); g.add(m); return g;
+  },
+  solitaire: function(){
+    var g = new THREE.Group(), M = MAT.gold;
+    g.add(new THREE.Mesh(new THREE.TorusGeometry(1, 0.085, 20, 84), M));
+    var basket = new THREE.Mesh(new THREE.TorusGeometry(0.205, 0.032, 12, 36), M);
+    basket.position.y = 1.13; basket.rotation.x = Math.PI/2; g.add(basket);
+    for (var i=0;i<4;i++){
+      var a = Math.PI/4 + i*Math.PI/2;
+      var p = new THREE.Mesh(new THREE.CylinderGeometry(0.019, 0.03, 0.36, 8), M);
+      p.position.set(Math.cos(a)*0.255, 1.27, Math.sin(a)*0.255);
+      p.rotation.z = -Math.cos(a)*0.2; p.rotation.x = Math.sin(a)*0.2;
+      g.add(p);
+    }
+    var gem = brilliant(0.30); gem.position.y = 1.36; g.add(gem);
+    return g;
+  },
+  pendant: function(){
+    var g = new THREE.Group(), M = MAT.plat;
+    var curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-1.58,1.66,-0.22), new THREE.Vector3(-0.86,1.34,0.02),
+      new THREE.Vector3(0,1.20,0.06), new THREE.Vector3(0.86,1.34,0.02),
+      new THREE.Vector3(1.58,1.66,-0.22)]);
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 90, 0.027, 8, false), M));
+    var bail = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.03, 12, 30), M);
+    bail.position.y = 1.06; g.add(bail);
+    var link = new THREE.Mesh(new THREE.CylinderGeometry(0.027,0.027,0.24,8), M);
+    link.position.y = 0.90; g.add(link);
+    var bezel = new THREE.Mesh(new THREE.TorusGeometry(0.40, 0.052, 16, 64), M);
+    bezel.position.y = 0.52; g.add(bezel);
+    var back = new THREE.Mesh(new THREE.CircleGeometry(0.30, 40), M);
+    back.position.set(0, 0.52, -0.085); g.add(back);
+    var gem = brilliant(0.26, MAT.gemFace);
+    gem.rotation.x = -Math.PI/2; gem.position.set(0,0.52,0.015); g.add(gem);
+    for (var i=0;i<16;i++){
+      var a = i/16*Math.PI*2;
+      var s = new THREE.Mesh(GEO.spark, MAT.spark);
+      s.position.set(Math.cos(a)*0.452, 0.52 + Math.sin(a)*0.452, 0.052);
+      s.rotation.set(a, a*1.7, i); g.add(s);
+    }
+    return g;
+  },
+  hoops: function(){
+    var g = new THREE.Group(), M = MAT.rose;
+    [-1,1].forEach(function(side){
+      var h = new THREE.Group();
+      h.add(new THREE.Mesh(new THREE.TorusGeometry(0.70, 0.055, 16, 72), M));
+      var post = new THREE.Mesh(new THREE.CylinderGeometry(0.018,0.018,0.28,8), M);
+      post.position.set(0,0.70,0.13); post.rotation.x = Math.PI/2; h.add(post);
+      h.position.x = side*0.84; h.rotation.y = side*0.23;
+      g.add(h);
+    });
+    return g;
+  },
+  bracelet: function(){
+    var inner = new THREE.Group(), M = MAT.plat, N = 20, R = 1.16;
+    for (var i=0;i<N;i++){
+      var a = i/N*Math.PI*2;
+      var l = new THREE.Group();
+      l.add(new THREE.Mesh(new THREE.BoxGeometry(0.30,0.082,0.165), M));
+      var s = new THREE.Mesh(GEO.sparkBig, MAT.spark);
+      s.position.y = 0.072; s.rotation.set(0.3, a*2.1, 0); l.add(s);
+      l.position.set(Math.cos(a)*R, 0, Math.sin(a)*R);
+      l.rotation.y = -a - Math.PI/2;
+      inner.add(l);
+    }
+    inner.rotation.x = 0.44;
+    var g = new THREE.Group(); g.add(inner); return g;
+  }
+};
+
+function initGfx(){
+  if (typeof THREE === "undefined") throw new Error("three.js unavailable");
+  renderer = new THREE.WebGLRenderer({ canvas:glC, antialias:true, alpha:true,
+                                       preserveDrawingBuffer:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.12;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+
+  var pm = new THREE.PMREMGenerator(renderer);
+  pm.compileEquirectangularShader();
+  var eq = envTexture();
+  scene.environment = pm.fromEquirectangular(eq).texture;
+  eq.dispose(); pm.dispose();
+
+  var key = new THREE.DirectionalLight(0xfff4e4, 1.5);  key.position.set(2.6,4.0,3.2);
+  var rim = new THREE.DirectionalLight(0xc6dcff, 0.85); rim.position.set(-3.1,1.3,-2.6);
+  var fil = new THREE.DirectionalLight(0xffffff, 0.3);  fil.position.set(0,-2.4,2.2);
+  scene.add(key, rim, fil, contactShadow());
+
+  MAT = materials();
+  GEO = { spark:new THREE.IcosahedronGeometry(0.052,0),
+          sparkBig:new THREE.IcosahedronGeometry(0.062,0) };
+
+  PIECES.forEach(function(p){
+    var g = BUILD[p.id]();
+    g.updateMatrixWorld(true);
+    var sph = new THREE.Box3().setFromObject(g).getBoundingSphere(new THREE.Sphere());
+    g.position.sub(sph.center);
+    p._fit = sph.radius / Math.sin(camera.fov * Math.PI/360) * 1.38;
+    g.visible = false;
+    groups[p.id] = g; scene.add(g);
+  });
+  gfxReady = true;
+}
+
+/* ============================ camera / render ============================ */
+function placeCamera(y,p,d){
+  var cp = Math.cos(p);
+  camera.position.set(d*cp*Math.sin(y), d*Math.sin(p), d*cp*Math.cos(y));
+  camera.lookAt(0,0,0);
+}
+function showOnly(id){
+  PIECES.forEach(function(p){ if (groups[p.id]) groups[p.id].visible = (p.id === id); });
+}
+function renderNow(){
+  if (view !== "detail" || mode !== "model" || !gfxReady) return;
+  if (!subject || subject.type !== "piece") return;
+  placeCamera(yaw, pitch, dist);
+  renderer.render(scene, camera);
+  readEl.textContent = (((yaw*180/Math.PI)%360+360)%360).toFixed(0) + "° · "
+                     + (fitDist/dist).toFixed(2) + "×";
+}
+function tick(){
+  requestAnimationFrame(tick);
+  if (view !== "detail" || mode !== "model" || !gfxReady || document.hidden) return;
+  if (autoSpin) yaw += 0.0026;
+  renderNow();
+}
+
+function grab(size){
+  var c = document.createElement("canvas"); c.width = c.height = size;
+  c.getContext("2d").drawImage(renderer.domElement, 0, 0, size, size);
+  return c;
+}
+function cssSize(){
+  var r = stageEl.getBoundingClientRect();
+  return { w:Math.max(1,Math.round(r.width)), h:Math.max(1,Math.round(r.height)) };
+}
+// Sizing only. Never paints, so it is safe to call from inside a capture.
+function sizeCanvases(){
+  var s = cssSize();
+  if (gfxReady && s.w > 1){
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(s.w, s.h, false);
+    camera.aspect = 1; camera.updateProjectionMatrix();
+  }
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  flatC.width = Math.round(s.w*dpr); flatC.height = Math.round(s.h*dpr);
+}
+function resize(){ sizeCanvases(); paintFlat(); renderNow(); }
+
+// Render offscreen at an exact pixel size (pixel ratio pinned to 1 so the
+// drawing buffer is never silently doubled), then put the canvas back.
+function withOffscreen(size, fn){
+  renderer.setPixelRatio(1);
+  renderer.setSize(size, size, false);
+  try { fn(); } finally { sizeCanvases(); }
+}
+function renderSpin(id){
+  if (spinCache[id]) return spinCache[id];
+  var size = 560, out = [];
+  spinCache[id] = out;              // publish the cache FIRST: anything that
+                                    // re-enters during capture must not recurse
+  withOffscreen(size, function(){
+    showOnly(id);
+    var d = pieceById(id)._fit;
+    for (var i=0;i<SPIN_FRAMES;i++){
+      placeCamera(i/SPIN_FRAMES*Math.PI*2, 0.2, d);
+      renderer.render(scene, camera);
+      out.push(grab(size));
+    }
+  });
+  return out;
+}
+function renderCardFrames(){
+  withOffscreen(CARD_SIZE, function(){
+    PIECES.forEach(function(p){
+      showOnly(p.id);
+      p._cards = [];
+      for (var i=0;i<CARD_FRAMES;i++){
+        placeCamera(0.55 + i/CARD_FRAMES*Math.PI*2, 0.22, p._fit);
+        renderer.render(scene, camera);
+        p._cards.push(grab(CARD_SIZE));
+      }
+    });
+  });
+}
+
+/* ============================ flat (2d) ============================ */
+function activeFrames(){
+  if (!subject) return [];
+  if (subject.type === "saved") return savedFrameCache[subject.id] || [];
+  if (!gfxReady) return [];
+  return renderSpin(subject.id);
+}
+function isSnap(){ var f = activeFrames(); return mode === "spin" && f.length > 1 && f.length <= 8; }
+function drawFit(src, alpha){
+  var W = flatC.width, H = flatC.height;
+  var sw = src.width || src.naturalWidth || 1, sh = src.height || src.naturalHeight || 1;
+  var k = Math.min(W/sw, H/sh) * zoom;
+  var w = sw*k, h = sh*k;
+  var x = (W-w)/2, y = (H-h)/2;
+  fctx.globalAlpha = alpha; fctx.drawImage(src, x, y, w, h); fctx.globalAlpha = 1;
+}
+function paintFlat(){
+  if (view !== "detail" || mode === "model") return;
+  var f = activeFrames();
+  fctx.clearRect(0,0,flatC.width,flatC.height);
+  if (!f.length){
+    fctx.fillStyle = "rgba(162,151,140,0.9)";
+    fctx.font = (12*(flatC.width/560)) + "px ui-monospace, monospace";
+    fctx.textAlign = "center";
+    fctx.fillText(subject && subject.type === "saved" ? "Loading photographs…"
+                                                      : "No photographs yet",
+                  flatC.width/2, flatC.height/2);
+    readEl.textContent = ""; return;
+  }
+  var i = Math.max(0, Math.min(f.length-1, frame));
+  if (fade < 1 && f[fadeFrom] && fadeFrom !== i){ drawFit(f[fadeFrom],1-fade); drawFit(f[i],fade); }
+  else drawFit(f[i], 1);
+  readEl.textContent = (f.length > 1
+      ? "frame " + (i+1) + " / " + f.length + " · " + (360/f.length).toFixed(f.length>8?1:0) + "°"
+      : "single frame")
+    + (zoom > 1.01 ? " · " + zoom.toFixed(1) + "×" : "");
+}
+function animateFade(){
+  if (fade >= 1) return;
+  fade = Math.min(1, fade + (REDUCE ? 1 : 0.14));
+  paintFlat();
+  if (fade < 1) requestAnimationFrame(animateFade);
+}
+function buildDots(){
+  var f = activeFrames(); dotsEl.innerHTML = "";
+  if (!isSnap()) return;
+  f.forEach(function(_, i){
+    var b = document.createElement("button");
+    b.type = "button"; b.setAttribute("aria-label","Angle "+(i+1));
+    b.setAttribute("aria-current", i===frame ? "true":"false");
+    b.addEventListener("click", function(){ goFrame(i); });
+    dotsEl.appendChild(b);
+  });
+}
+function syncDots(){
+  [].forEach.call(dotsEl.children, function(b,i){
+    b.setAttribute("aria-current", i===frame ? "true":"false");
+  });
+}
+function goFrame(i){
+  var f = activeFrames(); if (!f.length) return;
+  var n = f.length, next = ((i%n)+n)%n;
+  if (next === frame) return;
+  fadeFrom = frame; frame = next; fade = isSnap() ? 0 : 1;
+  syncDots();
+  if (fade < 1) animateFade(); else paintFlat();
+}
+
+/* ============================ modes ============================ */
+var HINTS = {
+  model:"Drag to turn · scroll to zoom · double-click to reset",
+  spin:"Drag across to spin · scroll to zoom",
+  snap:"Drag or tap the dots to change angle · scroll to zoom",
+  still:"Scroll to zoom · double-click to reset"
+};
+function setMode(m){
+  mode = m;
+  [].forEach.call(document.querySelectorAll(".mode"), function(b){
+    b.setAttribute("aria-selected", b.dataset.mode === m ? "true":"false");
+  });
+  stageEl.classList.toggle("flatmode", m !== "model");
+  if (m === "model"){
+    hintEl.textContent = HINTS.model; dotsEl.innerHTML = "";
+    stageEl.classList.remove("snapmode");
+    if (gfxReady && subject && subject.type === "piece"){ showOnly(subject.id); renderNow(); }
+    return;
+  }
+  zoom = 1;
+  if (frame >= activeFrames().length) frame = 0;
+  buildDots();
+  stageEl.classList.toggle("snapmode", isSnap());
+  hintEl.textContent = activeFrames().length < 2 ? HINTS.still
+                     : (isSnap() ? HINTS.snap : HINTS.spin);
+  paintFlat();
+}
+
+/* ============================ helpers ============================ */
+function pieceById(id){
+  for (var i=0;i<PIECES.length;i++) if (PIECES[i].id === id) return PIECES[i];
+  return null;
+}
+function savedById(id){
+  for (var i=0;i<savedPieces.length;i++) if (savedPieces[i].id === id) return savedPieces[i];
+  return null;
+}
+function lineName(id){
+  for (var i=0;i<LINES.length;i++) if (LINES[i].id === id) return LINES[i].name;
+  return LINES[0].name;
+}
+function esc(t){
+  return String(t == null ? "" : t).replace(/[&<>"]/g, function(c){
+    return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
+  });
+}
+/* viewer-authored text: escaped first, then **bold** honoured */
+function richText(t){
+  return esc(t).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/\n+/g, "<br>");
+}
+function blobUrl(ref){ return Backend ? Backend.urlFor(ref) : ""; }
+
+function normalizeSaved(doc){
+  var d = doc.data ? (doc.data() || {}) : doc;
+  return {
+    id: doc.id, saved: true,
+    line: d.line === "diamond" ? "diamond" : "gold",
+    name: d.name || "Untitled piece",
+    price: d.price || "", priceNote: d.priceNote || "",
+    summary: d.summary || "", note: d.note || "",
+    spec: Array.isArray(d.spec) ? d.spec : [],
+    frames: Array.isArray(d.frames) ? d.frames : [],
+    createdAt: typeof d.createdAt === "number" ? d.createdAt : 0
+  };
+}
+
+/* ============================ spec panel ============================ */
+function renderSpec(p){
+  var rows = (p.spec || []).filter(function(r){
+    return r && (r[0] || r[1]);
+  }).map(function(r){
+    return '<dt>' + esc(r[0]) + '</dt><dd' + (r[2] ? ' class="num"' : '') + '>'
+         + esc(r[1]) + '</dd>';
+  }).join("");
+
+  var collection = p.saved ? lineName(p.line) : p.collection;
+  var noteHtml = p.saved ? richText(p.note) : p.note;   /* demo notes are authored here */
+
+  specEl.innerHTML =
+    '<p class="eyebrow">' + SPARK + esc(collection) + ' collection</p>' +
+    '<h2>' + esc(p.name) + '</h2>' +
+    (p.price ? '<p class="price">' + esc(p.price)
+             + (p.priceNote ? '<small>' + esc(p.priceNote) + '</small>' : '') + '</p>' : '') +
+    '<div class="hair">' + SPARK + '</div>' +
+    (rows ? '<dl class="plate">' + rows + '</dl>' : '') +
+    (p.note ? '<p class="note">' + noteHtml + '</p>' : '');
+}
+
+/* The bar under the viewer. Rebuilt whenever the piece changes AND again once
+   the capabilities resolve, since on a direct page load they land after the
+   first render — which is why an owner could previously see no Edit button. */
+function renderDetailActions(kind, p){
+  if (kind === "s"){
+    detailActions.innerHTML =
+      '<a class="btn btn-primary" href="#/edit/' + encodeURIComponent(p.id) + '">Edit this piece</a>'
+      + '<p>Opens the same form you added it with, already filled in &mdash; '
+      + 'photographs, details and specification. Delete lives there too.</p>';
+  } else {
+    detailActions.innerHTML =
+      '<a class="btn" href="#/new">Add your own piece</a>'
+      + '<p><b>' + esc(p.name) + '</b> is one of the modelled sample pieces, so it '
+      + 'has no details to edit. Pieces you add can be edited any time.</p>';
+  }
+}
+
+/* ============================ cards ============================ */
+function makeCard(opts){
+  var a = document.createElement("a");
+  a.className = "card" + (opts.feature ? " feature" : "");
+  a.href = opts.href;
+
+  var img = document.createElement("span"); img.className = "card-img";
+  var cv = document.createElement("canvas");
+  cv.width = cv.height = CARD_SIZE;
+  img.appendChild(cv);
+  var turn = document.createElement("span");
+  turn.className = "card-turn";
+  img.appendChild(turn);
+  a.appendChild(img);
+
+  var body = document.createElement("span"); body.className = "card-body";
+  body.innerHTML =
+    '<span class="card-eyebrow">' + esc(opts.eyebrow) + '</span>' +
+    '<span class="card-name">' + esc(opts.name)
+      + (opts.tag ? '<span class="card-tag">' + esc(opts.tag) + '</span>' : '') + '</span>' +
+    (opts.spec  ? '<span class="card-spec">'  + esc(opts.spec)  + '</span>' : '') +
+    (opts.price ? '<span class="card-price">' + esc(opts.price) + '</span>' : '');
+  a.appendChild(body);
+
+  var cx = cv.getContext("2d");
+  var frames = opts.frames || [];
+  var timer = null, idx = 0, loading = false;
+
+  function paint(i){
+    if (!frames.length) return;
+    var src = frames[((i % frames.length) + frames.length) % frames.length];
+    if (!src) return;
+    var sw = src.width || src.naturalWidth, sh = src.height || src.naturalHeight;
+    if (!sw || !sh) return;
+    cx.clearRect(0,0,cv.width,cv.height);
+    var k = Math.max(cv.width/sw, cv.height/sh);
+    cx.drawImage(src, (cv.width-sw*k)/2, (cv.height-sh*k)/2, sw*k, sh*k);
+  }
+  function label(){
+    turn.innerHTML = SPARK + "<span>" + (frames.length > 1 ? "turning" : "view") + "</span>";
+  }
+  a._setFrames = function(list){ frames = list || []; idx = 0; label(); paint(0); };
+  label(); paint(0);
+
+  function start(){
+    if (timer || REDUCE) return;
+    if (frames.length < 2 && opts.ensure && !loading){
+      loading = true;
+      opts.ensure().then(function(list){
+        loading = false;
+        if (list && list.length) a._setFrames(list);
+        if (frames.length > 1 && a.matches(":hover")) start();
+      }, function(){ loading = false; });
+      return;
+    }
+    if (frames.length < 2) return;
+    timer = setInterval(function(){ idx++; paint(idx); }, 110);
+  }
+  function stop(){ clearInterval(timer); timer = null; idx = 0; paint(0); }
+  a.addEventListener("pointerenter", start);
+  a.addEventListener("pointerleave", stop);
+  a.addEventListener("focus", start);
+  a.addEventListener("blur", stop);
+  return a;
+}
+
+function savedCard(p){
+  var card = makeCard({
+    href:"#/s/" + encodeURIComponent(p.id),
+    frames:[], eyebrow:lineName(p.line) + " collection",
+    name:p.name, spec:p.summary, price:p.price,
+    ensure:function(){ return ensureSavedFrames(p); }
+  });
+  /* first frame only, so a long catalogue doesn't pull every image at once */
+  if (p.frames.length){
+    var first = new Image();
+    first.onload = function(){ card._setFrames([first]); };
+    first.src = blobUrl(p.frames[0]);
+  }
+  return card;
+}
+function demoCard(p){
+  return makeCard({
+    href:"#/p/" + p.id, feature:!!p.feature, frames:p._cards || [],
+    eyebrow:p.collection + " collection", name:p.name,
+    spec:p.summary, price:p.price, tag:"Sample"
+  });
+}
+
+function ensureSavedFrames(p){
+  if (savedFrameCache[p.id]) return Promise.resolve(savedFrameCache[p.id]);
+  return Promise.all(p.frames.map(function(id){
+    return new Promise(function(res){
+      var im = new Image();
+      im.onload = function(){ res(im); };
+      im.onerror = function(){ res(null); };
+      im.src = blobUrl(id);
+    });
+  })).then(function(list){
+    var ok = list.filter(Boolean);
+    savedFrameCache[p.id] = ok;
+    return ok;
+  });
+}
+
+/* ============================ collection grid ============================ */
+function samplesOn(){
+  if (!savedPieces.length) return true;          /* nothing of your own yet */
+  try { return localStorage.getItem("df.samples") !== "0"; } catch (_){ return true; }
+}
+function setSamples(on){
+  try { localStorage.setItem("df.samples", on ? "1" : "0"); } catch (_){}
+  buildGrid();
+}
+function buildGrid(){
+  sectionsEl.innerHTML = "";
+  var showSamples = samplesOn();
+
+  if (savedPieces.length){
+    var bar = document.createElement("div");
+    bar.className = "samplebar";
+    var b = document.createElement("button");
+    b.type = "button";
+    b.textContent = (showSamples ? "Hide" : "Show") + " the " + PIECES.length + " sample pieces";
+    b.addEventListener("click", function(){ setSamples(!showSamples); });
+    bar.appendChild(b);
+    sectionsEl.appendChild(bar);
+  }
+
+  LINES.forEach(function(line){
+    var mine  = savedPieces.filter(function(x){ return x.line === line.id; });
+    var demos = showSamples ? PIECES.filter(function(x){ return x.line === line.id; }) : [];
+    var cards = mine.map(savedCard).concat(demos.map(demoCard));
+    var n = cards.length;
+    var count = n ? n + (n === 1 ? " piece" : " pieces") : "empty";
+    var sec = sectionFor(line.name, count, cards, line.blurb);
+    if (!n){
+      var e = document.createElement("p");
+      e.className = "empty-line";
+      e.innerHTML = 'Nothing in ' + esc(line.name) + ' yet. '
+        + (canEdit ? '<a href="#/new">Add a piece</a> to start the collection.'
+                   : 'Pieces added here will appear in this section.');
+      sec.querySelector(".grid").appendChild(e);
+    }
+    sectionsEl.appendChild(sec);
+  });
+
+  var total = savedPieces.length + (showSamples ? PIECES.length : 0);
+  collCount.textContent = LINES.length + " collections · " + total
+    + (total === 1 ? " piece" : " pieces") + " · hover to turn, click for detail";
+}
+function sectionFor(title, count, cards, blurb){
+  var sec = document.createElement("section");
+  sec.className = "coll-section";
+  var head = document.createElement("div");
+  head.className = "section-head";
+  head.innerHTML = '<h3>' + SPARK + esc(title) + '</h3><span class="count">' + esc(count) + '</span>'
+    + (blurb ? '<span class="blurb">' + esc(blurb) + '</span>' : '');
+  sec.appendChild(head);
+  var g = document.createElement("div");
+  g.className = "grid";
+  cards.forEach(function(c){ g.appendChild(c); });
+  sec.appendChild(g);
+  return sec;
+}
+
+/* ============================ routing ============================ */
+function orderHrefs(){
+  var out = [], showSamples = samplesOn();
+  LINES.forEach(function(line){
+    savedPieces.filter(function(x){ return x.line === line.id; })
+      .forEach(function(x){ out.push("#/s/" + encodeURIComponent(x.id)); });
+    if (showSamples){
+      PIECES.filter(function(x){ return x.line === line.id; })
+        .forEach(function(x){ out.push("#/p/" + x.id); });
+    }
+  });
+  return out;
+}
+function setView(name){
+  view = name;
+  viewColl.hidden = name !== "collection";
+  viewDet.hidden  = name !== "detail";
+  viewForm.hidden = name !== "form";
+}
+function showCollection(){
+  setView("collection");
+  buildGrid();
+}
+function showDetail(kind, id){
+  var p = kind === "s" ? savedById(id) : pieceById(id);
+  if (!p){ location.hash = "#/"; return; }
+
+  setView("detail");
+  sizeCanvases();
+
+  var modelTab = document.querySelector(".mode[data-mode='model']");
+  frame = 0;
+
+  if (kind === "s"){
+    subject = { type:"saved", id:id };
+    modelTab.disabled = true;
+    failEl.hidden = true;
+    renderSpec(p);
+    setMode("spin");
+    ensureSavedFrames(p).then(function(){
+      if (subject && subject.type === "saved" && subject.id === id && view === "detail"){
+        if (frame >= activeFrames().length) frame = 0;
+        buildDots();
+        stageEl.classList.toggle("snapmode", isSnap());
+        hintEl.textContent = activeFrames().length < 2 ? HINTS.still
+                           : (isSnap() ? HINTS.snap : HINTS.spin);
+        paintFlat();
+      }
+    });
+  } else {
+    subject = { type:"piece", id:id };
+    modelTab.disabled = !gfxReady;
+    failEl.hidden = gfxReady;
+    renderSpec(p);
+    if (gfxReady){
+      fitDist = p._fit; dist = p._fit; yaw = 0.62; pitch = 0.20;
+      autoSpin = !REDUCE; showOnly(id);
+    }
+    setMode(gfxReady ? "model" : "spin");
+  }
+
+  renderDetailActions(kind, p);
+
+  var hrefs = orderHrefs();
+  var here = "#/" + kind + "/" + encodeURIComponent(id);
+  var i = hrefs.indexOf(here);
+  if (i < 0) i = 0;
+  prevLink.href = hrefs[(i - 1 + hrefs.length) % hrefs.length] || "#/";
+  nextLink.href = hrefs[(i + 1) % hrefs.length] || "#/";
+  var lonely = hrefs.length < 2;
+  prevLink.setAttribute("aria-disabled", lonely ? "true" : "false");
+  nextLink.setAttribute("aria-disabled", lonely ? "true" : "false");
+}
+function route(){
+  var h = location.hash.replace(/^#\/?/, "");
+  var m;
+  if (h === "new"){ openForm(null); return; }
+  if ((m = /^edit\/(.+)$/.exec(h))){ openForm(decodeURIComponent(m[1])); return; }
+  if ((m = /^([ps])\/(.+)$/.exec(h))){ showDetail(m[1], decodeURIComponent(m[2])); return; }
+  showCollection();
+}
+window.addEventListener("hashchange", function(){ route(); window.scrollTo(0,0); });
+
+/* ============================ frame intake ============================ */
+var MAX_EDGE = 1400;
+function busy(on, label, pct){
+  busyEl.classList.toggle("on", !!on);
+  if (label) busyLbl.textContent = label;
+  busyBar.style.width = (pct || 0) + "%";
+}
+function drawToBlob(src){
+  return new Promise(function(res, rej){
+    var w = src.naturalWidth || src.videoWidth || src.width;
+    var h = src.naturalHeight || src.videoHeight || src.height;
+    if (!w || !h){ rej(new Error("that image came through empty")); return; }
+    var k = Math.min(1, MAX_EDGE / Math.max(w, h));
+    var c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(w*k));
+    c.height = Math.max(1, Math.round(h*k));
+    var x = c.getContext("2d");
+    x.fillStyle = "#0b0b0b"; x.fillRect(0, 0, c.width, c.height);
+    x.drawImage(src, 0, 0, c.width, c.height);
+    c.toBlob(function(b){ b ? res(b) : rej(new Error("that image could not be encoded")); },
+             "image/jpeg", 0.88);
+  });
+}
+function fileToBlob(file){
+  return new Promise(function(res, rej){
+    var img = new Image();
+    img.onload = function(){ drawToBlob(img).then(res, rej); };
+    img.onerror = function(){ rej(new Error("could not read " + file.name)); };
+    img.src = URL.createObjectURL(file);
+  });
+}
+function seekTo(v, t){
+  return new Promise(function(res){
+    var done = false;
+    function ok(){ if (!done){ done = true; v.removeEventListener("seeked", ok); res(); } }
+    v.addEventListener("seeked", ok);
+    v.currentTime = t;
+    setTimeout(ok, 2500);
+  });
+}
+function framesFromVideo(file, onProgress){
+  return new Promise(function(res, rej){
+    var v = document.createElement("video");
+    v.muted = true; v.playsInline = true; v.preload = "auto";
+    v.src = URL.createObjectURL(file);
+    v.addEventListener("error", function(){
+      rej(new Error("that video format can’t be read here"));
+    });
+    v.addEventListener("loadeddata", function run(){
+      v.removeEventListener("loadeddata", run);
+      var d = v.duration;
+      if (!isFinite(d) || d <= 0){
+        rej(new Error("that video’s duration can’t be read")); return;
+      }
+      var out = [], i = 0;
+      (function next(){
+        if (i >= SPIN_FRAMES){ res(out); return; }
+        if (onProgress) onProgress(i + 1, SPIN_FRAMES);
+        seekTo(v, (d*0.995)*(i/SPIN_FRAMES) + d*0.0025).then(function(){
+          return drawToBlob(v);
+        }).then(function(b){ out.push(b); i++; next(); }, rej);
+      })();
+    });
+  });
+}
+
+/* ============================ piece editor ============================ */
+var viewForm   = $("viewForm");
+var formEl     = $("pieceForm");
+var dropzone   = $("dropzone");
+var framestrip = $("framestrip");
+var specRowsEl = $("specRows");
+var verdictEl  = $("frameVerdict");
+var noticeEl   = $("formNotice");
+var saveBtn    = $("saveBtn");
+var deleteBtn  = $("deleteBtn");
+var fName = $("fName"), fLine = $("fLine"), fPrice = $("fPrice");
+var fPriceNote = $("fPriceNote"), fSummary = $("fSummary"), fNote = $("fNote");
+
+var formFrames = [];     /* {kind:"new", blob, url} | {kind:"stored", id, url} */
+var editingId = null;
+var busyForm = false;
+
+var SPEC_TEMPLATE = {
+  gold: [["Metal",""],["Weight",""],["Size",""],["Finish",""],["Hallmark",""],["Reference",""]],
+  diamond: [["Metal",""],["Centre stone",""],["Carat",""],["Total weight",""],["Setting",""],["Reference",""]]
+};
+var NUMERIC_HINT = /weight|carat|size|length|width|depth|diameter|mm|count|stones/i;
+
+function notice(msg, bad){
+  noticeEl.hidden = !msg;
+  noticeEl.className = "notice" + (bad ? " bad" : "");
+  noticeEl.innerHTML = msg || "";
+}
+function specRow(label, value, isNum){
+  var row = document.createElement("div");
+  row.className = "specrow";
+
+  var l = document.createElement("input");
+  l.type = "text"; l.placeholder = "Metal"; l.value = label || "";
+  l.setAttribute("aria-label", "Specification label");
+
+  var v = document.createElement("input");
+  v.type = "text"; v.placeholder = "18K / 750 yellow gold"; v.value = value || "";
+  v.setAttribute("aria-label", "Specification value");
+
+  var n = document.createElement("button");
+  n.type = "button"; n.className = "numtog"; n.textContent = "N";
+  n.title = "Set in the figure colour";
+  n.setAttribute("aria-label", "Treat as a measurement");
+  n.setAttribute("aria-pressed", isNum ? "true" : "false");
+  n.addEventListener("click", function(){
+    n.setAttribute("aria-pressed", n.getAttribute("aria-pressed") === "true" ? "false" : "true");
+  });
+  /* guess once, while the row is still blank */
+  l.addEventListener("blur", function(){
+    if (!v.value && n.getAttribute("aria-pressed") === "false" && NUMERIC_HINT.test(l.value))
+      n.setAttribute("aria-pressed", "true");
+  });
+
+  var d = document.createElement("button");
+  d.type = "button"; d.className = "rowdel"; d.textContent = "✕";
+  d.setAttribute("aria-label", "Remove this row");
+  d.addEventListener("click", function(){ row.remove(); });
+
+  row.appendChild(l); row.appendChild(v); row.appendChild(n); row.appendChild(d);
+  return row;
+}
+function readSpecRows(){
+  return [].map.call(specRowsEl.querySelectorAll(".specrow"), function(r){
+    var ins = r.querySelectorAll("input");
+    return [ins[0].value.trim(), ins[1].value.trim(),
+            r.querySelector(".numtog").getAttribute("aria-pressed") === "true" ? 1 : 0];
+  }).filter(function(r){ return r[0] || r[1]; });
+}
+function fillSpecRows(rows){
+  specRowsEl.innerHTML = "";
+  (rows || []).forEach(function(r){ specRowsEl.appendChild(specRow(r[0], r[1], r[2])); });
+  if (!specRowsEl.children.length) specRowsEl.appendChild(specRow("", "", 0));
+}
+
+function frameVerdict(){
+  if (busyForm) return;
+  var n = formFrames.length;
+  if (!n){ verdictEl.textContent = "Nothing added yet."; return; }
+  var what = n === 1 ? "A single still — it will zoom, but it cannot turn."
+    : n <= 8 ? "An angle switcher: " + n + " positions, " + (360/n).toFixed(0) + "° apart."
+    : "A continuous spin at " + (360/n).toFixed(1) + "° per frame.";
+  verdictEl.textContent = n + (n === 1 ? " frame. " : " frames. ") + what;
+}
+function renderFrames(){
+  framestrip.innerHTML = "";
+  formFrames.forEach(function(f, i){
+    var chip = document.createElement("div");
+    chip.className = "fchip";
+
+    var im = document.createElement("img");
+    im.className = "fchip-img"; im.src = f.url; im.alt = "Frame " + (i+1);
+    chip.appendChild(im);
+
+    var x = document.createElement("button");
+    x.type = "button"; x.className = "fchip-no"; x.textContent = "✕";
+    x.setAttribute("aria-label", "Remove frame " + (i+1));
+    x.addEventListener("click", function(){
+      formFrames.splice(i, 1); renderFrames(); frameVerdict();
+    });
+    chip.appendChild(x);
+
+    var ord = document.createElement("div");
+    ord.className = "fchip-ord";
+    var lb = document.createElement("button");
+    lb.type = "button"; lb.textContent = "◀"; lb.disabled = i === 0;
+    lb.setAttribute("aria-label", "Move frame " + (i+1) + " earlier");
+    lb.addEventListener("click", function(){
+      var t = formFrames[i-1]; formFrames[i-1] = formFrames[i]; formFrames[i] = t;
+      renderFrames();
+    });
+    var rb = document.createElement("button");
+    rb.type = "button"; rb.textContent = "▶"; rb.disabled = i === formFrames.length - 1;
+    rb.setAttribute("aria-label", "Move frame " + (i+1) + " later");
+    rb.addEventListener("click", function(){
+      var t = formFrames[i+1]; formFrames[i+1] = formFrames[i]; formFrames[i] = t;
+      renderFrames();
+    });
+    ord.appendChild(lb); ord.appendChild(rb);
+    chip.appendChild(ord);
+
+    framestrip.appendChild(chip);
+  });
+}
+function addFiles(files){
+  files = [].slice.call(files || []);
+  if (!files.length) return;
+  var vid  = files.filter(function(f){ return /^video\//.test(f.type); })[0];
+  var imgs = files.filter(function(f){ return /^image\//.test(f.type); })
+    .sort(function(a,b){ return a.name.localeCompare(b.name, undefined, {numeric:true}); });
+
+  busyForm = true;
+  saveBtn.disabled = true;
+
+  var job;
+  if (vid){
+    verdictEl.textContent = "Reading " + vid.name + "…";
+    job = framesFromVideo(vid, function(i, n){
+      verdictEl.textContent = "Cutting frame " + i + " of " + n + " from " + vid.name + "…";
+    });
+  } else if (imgs.length){
+    var done = 0;
+    verdictEl.textContent = "Preparing " + imgs.length
+      + (imgs.length === 1 ? " photograph…" : " photographs…");
+    job = Promise.all(imgs.map(function(f){
+      return fileToBlob(f).then(function(b){
+        done++;
+        verdictEl.textContent = "Prepared " + done + " of " + imgs.length + "…";
+        return b;
+      });
+    }));
+  } else {
+    busyForm = false; saveBtn.disabled = !Backend;
+    notice("Those files weren’t images or video.", true);
+    return;
+  }
+
+  job.then(function(blobs){
+    blobs.forEach(function(b){
+      formFrames.push({ kind:"new", blob:b, url:URL.createObjectURL(b) });
+    });
+    busyForm = false; saveBtn.disabled = !Backend;
+    notice("");
+    renderFrames(); frameVerdict();
+  }, function(err){
+    busyForm = false; saveBtn.disabled = !Backend;
+    frameVerdict();
+    notice("<b>Those files could not be read.</b> "
+      + esc(err && err.message ? err.message : "") + " Try JPEGs, or an MP4 / MOV video.", true);
+  });
+}
+
+function openForm(id){
+  setView("form");
+  editingId = id || null;
+  formFrames = [];
+  busyForm = false;
+  notice("");
+  fName.classList.remove("bad");
+
+  var p = id ? savedById(id) : null;
+  if (id && !p && dbReady){ location.hash = "#/"; return; }
+
+  $("formMode").textContent = p ? "Editing" : "New piece";
+  $("formTitle").textContent = p ? "Edit piece" : "Add a piece";
+  deleteBtn.hidden = !p;
+
+  fName.value = p ? p.name : "";
+  fLine.value = p ? p.line : "gold";
+  fPrice.value = p ? p.price : "";
+  fPriceNote.value = p ? p.priceNote : "Incl. VAT";
+  fSummary.value = p ? p.summary : "";
+  fNote.value = p ? p.note : "";
+  fillSpecRows(p && p.spec.length ? p.spec : SPEC_TEMPLATE[fLine.value]);
+
+  if (p){
+    formFrames = p.frames.map(function(aid){
+      return { kind:"stored", id:aid, url:blobUrl(aid) };
+    });
+  }
+  renderFrames(); frameVerdict();
+
+  if (!Backend){
+    notice(dbErrorMsg || "<b>Saving isn’t available in this view.</b> "
+      + "Pieces can only be saved by someone signed in who can edit this page.", true);
+    saveBtn.disabled = true;
+  } else {
+    saveBtn.disabled = false;
+  }
+}
+
+/* Re-template when the collection changes, but only while the plate is still
+   a blank template: labels alone don't count as the user's work, typed values do. */
+function specValuesEmpty(){
+  return readSpecRows().every(function(r){ return !r[1]; });
+}
+fLine.addEventListener("change", function(){
+  if (!editingId && specValuesEmpty()) fillSpecRows(SPEC_TEMPLATE[fLine.value]);
+});
+
+dropzone.addEventListener("click", function(){ pickEl.click(); });
+dropzone.addEventListener("keydown", function(e){
+  if (e.key === "Enter" || e.key === " "){ e.preventDefault(); pickEl.click(); }
+});
+["dragenter","dragover"].forEach(function(ev){
+  dropzone.addEventListener(ev, function(e){ e.preventDefault(); dropzone.classList.add("over"); });
+});
+["dragleave","drop"].forEach(function(ev){
+  dropzone.addEventListener(ev, function(e){ e.preventDefault(); dropzone.classList.remove("over"); });
+});
+dropzone.addEventListener("drop", function(e){
+  if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files);
+});
+pickEl.addEventListener("change", function(e){ addFiles(e.target.files); pickEl.value = ""; });
+$("addSpecRow").addEventListener("click", function(){
+  specRowsEl.appendChild(specRow("", "", 0));
+});
+addBtn.addEventListener("click", function(){ location.hash = "#/new"; });
+formEl.addEventListener("submit", function(e){ e.preventDefault(); savePiece(); });
+
+function savePiece(){
+  if (!Backend || busyForm) return;
+
+  var name = fName.value.trim();
+  fName.classList.toggle("bad", !name);
+  if (!name){
+    notice("Give the piece a name — it heads its page and its catalogue card.", true);
+    fName.focus();
+    return;
+  }
+  if (!formFrames.length){
+    notice("Add at least one photograph. Four gives an angle switcher; "
+      + "twenty-four gives a smooth spin.", true);
+    dropzone.focus();
+    return;
+  }
+
+  busyForm = true;
+  saveBtn.disabled = true;
+  notice("");
+  var pending = formFrames.filter(function(f){ return f.kind === "new"; }).length;
+  var stored = 0;
+  if (pending) verdictEl.textContent = "Storing " + pending + " frames…";
+
+  /* sequential: kinder to the upload rate limit than 24 at once */
+  var ids = [];
+  var chain = Promise.resolve();
+  formFrames.forEach(function(f){
+    chain = chain.then(function(){
+      if (f.kind === "stored"){ ids.push(f.id); return; }
+      if (!Backend) throw { code:"not_granted", message:"" };
+      return Backend.upload(f.blob).then(function(ref){
+        stored++;
+        verdictEl.textContent = "Stored frame " + stored + " of " + pending + "…";
+        f.kind = "stored"; f.id = ref;      /* a retry won't re-upload it */
+        ids.push(ref);
+      });
+    });
+  });
+
+  chain.then(function(){
+    var id = editingId || ("p" + Date.now().toString(36)
+                           + Math.random().toString(36).slice(2, 7));
+    var existing = editingId ? savedById(editingId) : null;
+    return Backend.save(id, {
+      name: name,
+      line: fLine.value === "diamond" ? "diamond" : "gold",
+      price: fPrice.value.trim(),
+      priceNote: fPriceNote.value.trim(),
+      summary: fSummary.value.trim(),
+      note: fNote.value.trim(),
+      spec: readSpecRows(),
+      frames: ids,
+      createdAt: existing && existing.createdAt ? existing.createdAt : Date.now(),
+      updatedAt: Date.now()
+    });
+  }).then(function(id){
+    busyForm = false; saveBtn.disabled = false;
+    delete savedFrameCache[id];
+    location.hash = "#/s/" + encodeURIComponent(id);
+  }, function(err){
+    busyForm = false; saveBtn.disabled = false;
+    frameVerdict();
+    notice(saveErrorText(err), true);
+  });
+}
+
+function saveErrorText(err){
+  var code = err && err.code;
+  if (code === "not_granted" || code === "capability_disabled" || code === "capability_removed")
+    return "<b>This view can’t save.</b> Open the published page signed in, "
+         + "as someone who can edit it.";
+  if (code === "rls")
+    return "<b>You\u2019re not signed in as the owner.</b> Use "
+         + "<em>Sign in to edit</em> at the top of the page, then save again.";
+  if (code === "invalid_argument")
+    return "<b>That save was refused.</b> This view is read-only — only an editor "
+         + "of this page can add or change pieces.";
+  if (code === "quota_exceeded" || code === "quota_or_state")
+    return "<b>Storage is full.</b> Delete a piece you no longer need, then try again.";
+  if (code === "too_large")
+    return "<b>A photograph was too large</b> even after resizing. Try a smaller file.";
+  if (code === "unsupported_type")
+    return "<b>That file type isn’t supported.</b> Use JPEG or PNG photographs.";
+  if (code === "rate_limited")
+    return "<b>Too many uploads at once.</b> Wait a moment, then save again — "
+         + "frames already stored won’t upload twice.";
+  if (code === "unavailable" || code === "store_unavailable")
+    return "<b>Couldn’t reach storage.</b> Check the connection and save again.";
+  return "<b>That didn’t save.</b> "
+    + esc(err && err.message ? err.message : "Please try again.");
+}
+
+deleteBtn.addEventListener("click", function(){
+  if (!editingId || !Backend || busyForm) return;
+  var p = savedById(editingId);
+  if (!p) return;
+  if (!window.confirm("Delete “" + p.name + "” and its "
+      + p.frames.length + (p.frames.length === 1 ? " photograph" : " photographs")
+      + "? This cannot be undone.")) return;
+
+  busyForm = true; saveBtn.disabled = true; deleteBtn.disabled = true;
+  notice("Deleting…");
+
+  var gone = p.frames.slice();
+  Backend.remove(editingId, gone).then(function(){
+    busyForm = false; saveBtn.disabled = false; deleteBtn.disabled = false;
+    delete savedFrameCache[editingId];
+    location.hash = "#/";
+  }, function(err){
+    busyForm = false; saveBtn.disabled = false; deleteBtn.disabled = false;
+    notice(saveErrorText(err), true);
+  });
+});
+
+/* ============================ storage backends ============================ */
+/* Two implementations of the same five calls, so nothing above this line knows
+   which is live: Supabase for the deployed app, the claude.ai artifact runtime
+   when the page is opened as an artifact. */
+
+function reloadCatalogue(){
+  if (!Backend) return Promise.resolve();
+  return Backend.load().then(function(list){
+    savedPieces = list.sort(function(a, b){ return (a.createdAt || 0) - (b.createdAt || 0); });
+    dbReady = true;
+    if (view === "collection") buildGrid();
+    if (view === "detail" && subject && subject.type === "saved"){
+      var cur = savedById(subject.id);
+      if (cur){ renderSpec(cur); renderDetailActions("s", cur); }
+    }
+  }, function(e){
+    dbReady = true;
+    dbErrorMsg = "<b>The catalogue couldn’t be loaded.</b> "
+      + esc(e && e.message ? e.message : "") ;
+    if (view === "collection") buildGrid();
+  });
+}
+
+/* ---- Supabase ---- */
+function sbError(e){
+  var msg = (e && e.message) || "";
+  if (/row-level security|violates row-level/i.test(msg) || e.code === "42501")
+    return { code:"rls", message:msg };
+  if (/JWT|not authenticated|Invalid Refresh/i.test(msg))
+    return { code:"rls", message:msg };
+  if (/Failed to fetch|NetworkError/i.test(msg))
+    return { code:"unavailable", message:msg };
+  return { code:(e && e.code) || "unknown", message:msg };
+}
+function supabaseBackend(sb){
+  var bucket = sb.storage.from("piece-photos");
+  function fromRow(r){
+    return {
+      id: r.id, saved: true,
+      line: r.line === "diamond" ? "diamond" : "gold",
+      name: r.name || "Untitled piece",
+      price: r.price || "", priceNote: r.price_note || "",
+      summary: r.summary || "", note: r.note || "",
+      spec: Array.isArray(r.spec) ? r.spec : [],
+      frames: Array.isArray(r.frames) ? r.frames : [],
+      createdAt: r.created_at ? Date.parse(r.created_at) : 0
+    };
+  }
+  return {
+    kind: "supabase",
+    urlFor: function(ref){ return bucket.getPublicUrl(ref).data.publicUrl; },
+    load: function(){
+      return sb.from("pieces").select("*").order("created_at", { ascending: true })
+        .then(function(res){
+          if (res.error) throw sbError(res.error);
+          return (res.data || []).map(fromRow);
+        });
+    },
+    upload: function(blob){
+      var path = Date.now().toString(36) + "-"
+               + Math.random().toString(36).slice(2, 9) + ".jpg";
+      return bucket.upload(path, blob, { contentType:"image/jpeg", upsert:false })
+        .then(function(res){
+          if (res.error) throw sbError(res.error);
+          return path;
+        });
+    },
+    save: function(id, body){
+      return sb.from("pieces").upsert({
+        id: id, name: body.name, line: body.line, price: body.price,
+        price_note: body.priceNote, summary: body.summary, note: body.note,
+        spec: body.spec, frames: body.frames,
+        updated_at: new Date().toISOString()
+      }).then(function(res){
+        if (res.error) throw sbError(res.error);
+        return reloadCatalogue().then(function(){ return id; });
+      });
+    },
+    remove: function(id, frames){
+      return sb.from("pieces").delete().eq("id", id).then(function(res){
+        if (res.error) throw sbError(res.error);
+        /* row first: an orphaned photo is tidier than a card with dead images */
+        return frames.length ? bucket.remove(frames) : null;
+      }).then(function(){ return reloadCatalogue(); });
+    }
+  };
+}
+
+/* ---- claude.ai artifact runtime ---- */
+function claudeBackend(db, assets){
+  return {
+    kind: "claude",
+    urlFor: function(ref){ return "/_blob/" + ref; },
+    load: function(){
+      return db.collection("pieces").get().then(function(snap){
+        return snap.docs.map(normalizeSaved);
+      });
+    },
+    upload: function(blob){
+      if (!assets) return Promise.reject({ code:"not_granted", message:"" });
+      return assets.upload(blob, { type:"image/jpeg" }).then(function(r){ return r.id; });
+    },
+    save: function(id, body){
+      return db.doc("pieces/" + id).set(body)
+        .then(function(){ return reloadCatalogue(); })
+        .then(function(){ return id; });
+    },
+    remove: function(id, frames){
+      return db.doc("pieces/" + id)["delete"]().then(function(){
+        if (!assets) return;
+        return frames.reduce(function(chain, aid){
+          return chain.then(function(){ return assets["delete"](aid).then(null, function(){}); });
+        }, Promise.resolve());
+      }).then(function(){ return reloadCatalogue(); });
+    }
+  };
+}
+
+/* ============================ sign in ============================ */
+var sbClient = null;
+function paintAuth(email){
+  if (!sbClient){ authBtn.hidden = true; return; }
+  authBtn.hidden = false;
+  authBtn.textContent = email ? "Sign out" : "Sign in to edit";
+  authBtn.title = email ? ("Signed in as " + email) : "";
+}
+function wireAuth(cfg){
+  authBtn.addEventListener("click", function(){
+    if (!sbClient) return;
+    sbClient.auth.getSession().then(function(r){
+      var sess = r.data && r.data.session;
+      if (sess) return sbClient.auth.signOut().then(function(){ location.reload(); });
+      authBtn.disabled = true;
+      authBtn.textContent = "Sending…";
+      return sbClient.auth.signInWithOtp({
+        email: cfg.OWNER_EMAIL,
+        options: { emailRedirectTo: location.origin + location.pathname }
+      }).then(function(res){
+        authBtn.disabled = false;
+        if (res.error){
+          authBtn.textContent = "Sign in to edit";
+          window.alert("Could not send the sign-in link:\n" + res.error.message);
+        } else {
+          authBtn.textContent = "Check your email";
+          window.alert("A sign-in link is on its way to " + cfg.OWNER_EMAIL
+            + ".\nOpen it on this device to edit the catalogue.");
+        }
+      });
+    });
+  });
+}
+
+/* ============================ boot the backend ============================ */
+function connect(){
+  var cfg = window.DF_CONFIG || {};
+  var hasSupabase = cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY
+                 && typeof window.supabase !== "undefined";
+
+  if (hasSupabase){
+    sbClient = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+    Backend = supabaseBackend(sbClient);
+    wireAuth(cfg);
+
+    sbClient.auth.onAuthStateChange(function(){ settleAuth(cfg); });
+    settleAuth(cfg);
+    reloadCatalogue();
+    return;
+  }
+
+  if (typeof window.claude !== "undefined" && window.claude && window.claude.use){
+    Promise.all([
+      window.claude.use("db").then(null, function(){ return null; }),
+      window.claude.use("assets").then(null, function(){ return null; }),
+      window.claude.use("user").then(null, function(){ return null; })
+    ]).then(function(r){
+      if (!r[0]){
+        dbErrorMsg = "<b>Saving isn’t available in this view.</b>";
+        afterAuth();
+        return;
+      }
+      Backend = claudeBackend(r[0], r[1]);
+      var told = (r[2] && typeof r[2].canEdit === "function") ? r[2].canEdit() : null;
+      canEdit = (told === null || told === undefined) ? true : !!told;
+      afterAuth();
+      reloadCatalogue();
+    });
+    return;
+  }
+
+  dbErrorMsg = "<b>Saving isn’t available here.</b> The catalogue needs its "
+    + "backend configured — see README.md.";
+  afterAuth();
+}
+
+function settleAuth(cfg){
+  sbClient.auth.getSession().then(function(r){
+    var sess = r.data && r.data.session;
+    var email = sess && sess.user && sess.user.email;
+    canEdit = !!(email && cfg.OWNER_EMAIL
+                 && email.toLowerCase() === String(cfg.OWNER_EMAIL).toLowerCase());
+    paintAuth(email || "");
+    afterAuth();
+  });
+}
+
+/* Re-render the parts whose contents depend on who is looking. */
+function afterAuth(){
+  addBtn.hidden = !canEdit;
+  if (view === "form") openForm(editingId);
+  if (view === "collection") buildGrid();
+  if (view === "detail" && subject){
+    var cur = subject.type === "saved" ? savedById(subject.id) : pieceById(subject.id);
+    if (cur) renderDetailActions(subject.type === "saved" ? "s" : "p", cur);
+  }
+}
+
+/* Use the real logo artwork when it is present; otherwise the typographic
+   lockup stands in, so the masthead is never a broken image. */
+(function(){
+  var logo = $("houseLogo");
+  if (!logo) return;
+  logo.addEventListener("load", function(){
+    if (!logo.naturalWidth) return;
+    logo.hidden = false;
+    $("houseLockup").hidden = true;
+    $("houseSub").hidden = true;
+  });
+})();
+
+/* ============================ interaction ============================ */
+var drag = null;
+stageEl.addEventListener("pointerdown", function(e){
+  stageEl.setPointerCapture(e.pointerId);
+  drag = { x:e.clientX, y:e.clientY, f:frame };
+  autoSpin = false;
+});
+stageEl.addEventListener("pointermove", function(e){
+  if (!drag) return;
+  var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  if (mode === "model"){
+    yaw += dx*0.0085; drag.x = e.clientX;
+    pitch = Math.max(-1.2, Math.min(1.2, pitch + dy*-0.0065)); drag.y = e.clientY;
+    renderNow();
+  } else {
+    var f = activeFrames(); if (!f.length) return;
+    var w = stageEl.getBoundingClientRect().width;
+    if (isSnap()){
+      goFrame(drag.f + Math.round(dx / (w / (f.length*1.25))));
+    } else {
+      var n = f.length;
+      var idx = ((drag.f + Math.round(dx / (w/(n*1.4)))) % n + n) % n;
+      if (idx !== frame){ frame = idx; fade = 1; paintFlat(); }
+    }
+  }
+});
+function endDrag(e){
+  if (drag && e){ try { stageEl.releasePointerCapture(e.pointerId); } catch(_){} }
+  drag = null;
+}
+stageEl.addEventListener("pointerup", endDrag);
+stageEl.addEventListener("pointercancel", endDrag);
+stageEl.addEventListener("wheel", function(e){
+  e.preventDefault(); autoSpin = false;
+  if (mode === "model"){
+    dist = Math.max(fitDist*0.42, Math.min(fitDist*1.9, dist*(1 + e.deltaY*0.0012)));
+    renderNow();
+  } else {
+    zoom = Math.max(1, Math.min(5, zoom*(1 - e.deltaY*0.0014)));
+    paintFlat();
+  }
+}, { passive:false });
+stageEl.addEventListener("dblclick", function(){
+  if (mode === "model"){ yaw = 0.62; pitch = 0.20; dist = fitDist; renderNow(); }
+  else { zoom = 1; paintFlat(); }
+});
+stageEl.addEventListener("keydown", function(e){
+  var k = e.key;
+  if (k !== "ArrowLeft" && k !== "ArrowRight" && k !== "ArrowUp" && k !== "ArrowDown") return;
+  e.preventDefault(); autoSpin = false;
+  if (mode === "model"){
+    if (k === "ArrowLeft")  yaw -= 0.12;
+    if (k === "ArrowRight") yaw += 0.12;
+    if (k === "ArrowUp")    pitch = Math.min(1.2, pitch + 0.09);
+    if (k === "ArrowDown")  pitch = Math.max(-1.2, pitch - 0.09);
+    renderNow();
+  } else {
+    goFrame(frame + (k === "ArrowRight" ? 1 : k === "ArrowLeft" ? -1 : 0));
+  }
+});
+document.addEventListener("keydown", function(e){
+  if (e.key === "Escape" && view === "detail") location.hash = "#/";
+});
+[].forEach.call(document.querySelectorAll(".mode"), function(b){
+  b.addEventListener("click", function(){ if (!b.disabled) setMode(b.dataset.mode); });
+});
+document.addEventListener("visibilitychange", function(){
+  if (!document.hidden){ renderNow(); if (mode !== "model") paintFlat(); }
+});
+var rt;
+window.addEventListener("resize", function(){
+  clearTimeout(rt); rt = setTimeout(function(){ if (view === "detail") resize(); }, 120);
+});
+// A page opened in a background tab lays out at zero width, so the canvases
+// would size to nothing and never recover on their own. Re-size whenever the
+// stage actually gains dimensions.
+if (window.ResizeObserver){
+  new ResizeObserver(function(){
+    if (view === "detail" && stageEl.getBoundingClientRect().width > 1) resize();
+  }).observe(stageEl);
+}
+
+/* ============================ boot ============================ */
+try {
+  initGfx();
+  renderCardFrames();
+} catch (err){
+  gfxReady = false;
+  PIECES.forEach(function(p){ p._cards = []; });
+}
+addBtn.hidden = true;        /* revealed once we know this viewer can edit */
+route();
+tick();
+connect();
+})();
+</script>
+
+<script>
+/* Register the service worker so the app installs and opens offline.
+   Never on file:// — it would throw and there is nothing to cache there. */
+if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./sw.js").catch(function () {});
+  });
+}
+</script>
+</body>
+</html>
