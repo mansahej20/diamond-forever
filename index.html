@@ -1971,88 +1971,91 @@ function claudeBackend(db, assets){
 
 /* ============================ sign in ============================ */
 var sbClient = null;
+var signedInAs = "";
+
 function paintAuth(email){
   if (!sbClient){ authBtn.hidden = true; return; }
+  signedInAs = email || "";
   authBtn.hidden = false;
-  authBtn.textContent = email ? "Sign out" : "Sign in to edit";
+  authBtn.textContent = email ? "Sign out" : "Sign in";
   authBtn.title = email ? ("Signed in as " + email) : "";
 }
-function wireAuth(cfg){
+function siMessage(text){
+  var el = $("siMsg");
+  el.hidden = !text;
+  el.textContent = text || "";
+}
+function openSignin(){
+  $("signin").hidden = false;
+  siMessage("");
+  $("siPass").value = "";
+  setTimeout(function(){ ($("siEmail").value ? $("siPass") : $("siEmail")).focus(); }, 30);
+}
+function closeSignin(){ $("signin").hidden = true; }
+
+function wireAuth(){
   authBtn.addEventListener("click", function(){
     if (!sbClient) return;
-    sbClient.auth.getSession().then(function(r){
-      var sess = r.data && r.data.session;
-      if (sess) return sbClient.auth.signOut().then(function(){ location.reload(); });
+    if (signedInAs){
       authBtn.disabled = true;
-      authBtn.textContent = "Sending…";
-      return sbClient.auth.signInWithOtp({
-        email: cfg.OWNER_EMAIL,
-        options: { emailRedirectTo: location.origin + location.pathname }
-      }).then(function(res){
-        authBtn.disabled = false;
-        if (res.error){
-          authBtn.textContent = "Sign in to edit";
-          window.alert("Could not send the sign-in link:\n" + res.error.message);
-        } else {
-          authBtn.textContent = "Check your email";
-          window.alert("A sign-in link is on its way to " + cfg.OWNER_EMAIL
-            + ".\nOpen it on this device to edit the catalogue.");
-        }
-      });
+      sbClient.auth.signOut().then(function(){ location.reload(); });
+      return;
+    }
+    openSignin();
+  });
+  $("siCancel").addEventListener("click", closeSignin);
+  $("signin").addEventListener("click", function(e){
+    if (e.target === $("signin")) closeSignin();   /* click the backdrop to dismiss */
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && !$("signin").hidden) closeSignin();
+  });
+
+  $("signinForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var email = $("siEmail").value.trim();
+    var pass  = $("siPass").value;
+    if (!email || !pass){ siMessage("Enter an email and a password."); return; }
+
+    $("siGo").disabled = true;
+    siMessage("Signing in…");
+    sbClient.auth.signInWithPassword({ email: email, password: pass }).then(function(res){
+      $("siGo").disabled = false;
+      if (res.error){
+        var m = res.error.message || "";
+        siMessage(/Invalid login/i.test(m)
+          ? "That email and password don’t match an account."
+          : m);
+        return;
+      }
+      $("siPass").value = "";
+      closeSignin();
+      settleAuth();
+    }, function(err){
+      $("siGo").disabled = false;
+      siMessage((err && err.message) || "Could not reach the sign-in service.");
     });
   });
 }
 
-/* ============================ boot the backend ============================ */
-function connect(){
-  var cfg = window.DF_CONFIG || {};
-  var hasSupabase = cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY
-                 && typeof window.supabase !== "undefined";
-
-  if (hasSupabase){
-    sbClient = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
-    Backend = supabaseBackend(sbClient);
-    wireAuth(cfg);
-
-    sbClient.auth.onAuthStateChange(function(){ settleAuth(cfg); });
-    settleAuth(cfg);
-    reloadCatalogue();
-    return;
-  }
-
-  if (typeof window.claude !== "undefined" && window.claude && window.claude.use){
-    Promise.all([
-      window.claude.use("db").then(null, function(){ return null; }),
-      window.claude.use("assets").then(null, function(){ return null; }),
-      window.claude.use("user").then(null, function(){ return null; })
-    ]).then(function(r){
-      if (!r[0]){
-        dbErrorMsg = "<b>Saving isn’t available in this view.</b>";
-        afterAuth();
-        return;
-      }
-      Backend = claudeBackend(r[0], r[1]);
-      var told = (r[2] && typeof r[2].canEdit === "function") ? r[2].canEdit() : null;
-      canEdit = (told === null || told === undefined) ? true : !!told;
-      afterAuth();
-      reloadCatalogue();
-    });
-    return;
-  }
-
-  dbErrorMsg = "<b>Saving isn’t available here.</b> The catalogue needs its "
-    + "backend configured — see README.md.";
-  afterAuth();
-}
-
-function settleAuth(cfg){
+/* Signed in is not the same as allowed to edit: the database decides, through
+   the editors allowlist. Ask it rather than trusting anything in the browser. */
+function settleAuth(){
   sbClient.auth.getSession().then(function(r){
     var sess = r.data && r.data.session;
     var email = sess && sess.user && sess.user.email;
-    canEdit = !!(email && cfg.OWNER_EMAIL
-                 && email.toLowerCase() === String(cfg.OWNER_EMAIL).toLowerCase());
-    paintAuth(email || "");
-    afterAuth();
+    if (!email){ canEdit = false; paintAuth(""); afterAuth(); return; }
+    sbClient.rpc("is_editor").then(function(res){
+      canEdit = !res.error && res.data === true;
+      paintAuth(email);
+      if (!canEdit){
+        dbErrorMsg = "<b>" + esc(email) + " isn’t on the editors list.</b> "
+          + "Ask an editor to add that address, then sign in again.";
+      }
+      afterAuth();
+    }, function(){
+      canEdit = false; paintAuth(email); afterAuth();
+    });
   });
 }
 

@@ -1,6 +1,6 @@
 -- Diamond Forever — catalogue schema.
 -- Anyone may READ the catalogue (it is a shop window).
--- Only the signed-in owner may write it.
+-- Only addresses listed in public.editors may write it.
 
 create table if not exists public.pieces (
   id          text primary key,
@@ -20,41 +20,66 @@ create index if not exists pieces_line_created_idx on public.pieces (line, creat
 
 alter table public.pieces enable row level security;
 
--- Who counts as the owner. Kept in one function so the address lives in exactly
--- one place; change it here and every policy follows. SECURITY INVOKER: it only
--- compares the caller's own JWT email to a constant, so it needs no elevated
--- rights, and definer rights here would be surface for nothing.
-create or replace function public.is_owner()
+-- Who may edit. An allowlist, not "anyone with an account": even if sign-ups
+-- are ever left open, only addresses listed here can write.
+create table if not exists public.editors (
+  email    text primary key,
+  note     text not null default '',
+  added_at timestamptz not null default now()
+);
+
+alter table public.editors enable row level security;
+
+-- SECURITY DEFINER on purpose: this reads public.editors, and the policies on
+-- public.editors call it. Invoker rights would recurse. Execute is revoked from
+-- anon so only a signed-in session can ask.
+create or replace function public.is_editor()
 returns boolean
 language sql
 stable
-security invoker
+security definer
 set search_path = ''
 as $$
-  select coalesce(auth.jwt() ->> 'email', '') = 'mansahej3009@gmail.com';
+  select exists (
+    select 1 from public.editors e
+    where lower(e.email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+  );
 $$;
+
+revoke execute on function public.is_editor() from anon, public;
+grant execute on function public.is_editor() to authenticated;
+
+drop policy if exists "editors read the list" on public.editors;
+create policy "editors read the list"
+  on public.editors for select to authenticated
+  using (public.is_editor());
+
+drop policy if exists "editors manage the list" on public.editors;
+create policy "editors manage the list"
+  on public.editors for all to authenticated
+  using (public.is_editor()) with check (public.is_editor());
 
 drop policy if exists "catalogue readable by anyone" on public.pieces;
 create policy "catalogue readable by anyone"
   on public.pieces for select
   using (true);
 
-drop policy if exists "owner inserts" on public.pieces;
-create policy "owner inserts"
+drop policy if exists "editors insert pieces" on public.pieces;
+create policy "editors insert pieces"
   on public.pieces for insert to authenticated
-  with check (public.is_owner());
+  with check (public.is_editor());
 
-drop policy if exists "owner updates" on public.pieces;
-create policy "owner updates"
+drop policy if exists "editors update pieces" on public.pieces;
+create policy "editors update pieces"
   on public.pieces for update to authenticated
-  using (public.is_owner()) with check (public.is_owner());
+  using (public.is_editor()) with check (public.is_editor());
 
-drop policy if exists "owner deletes" on public.pieces;
-create policy "owner deletes"
+drop policy if exists "editors delete pieces" on public.pieces;
+create policy "editors delete pieces"
   on public.pieces for delete to authenticated
-  using (public.is_owner());
+  using (public.is_editor());
 
--- Photographs. Public read so the shop window works signed out; owner-only write.
+-- Photographs. Public read so the shop window works signed out.
 insert into storage.buckets (id, name, public)
 values ('piece-photos', 'piece-photos', true)
 on conflict (id) do update set public = true;
@@ -64,17 +89,17 @@ create policy "photos readable by anyone"
   on storage.objects for select
   using (bucket_id = 'piece-photos');
 
-drop policy if exists "owner uploads photos" on storage.objects;
-create policy "owner uploads photos"
+drop policy if exists "editors upload photos" on storage.objects;
+create policy "editors upload photos"
   on storage.objects for insert to authenticated
-  with check (bucket_id = 'piece-photos' and public.is_owner());
+  with check (bucket_id = 'piece-photos' and public.is_editor());
 
-drop policy if exists "owner replaces photos" on storage.objects;
-create policy "owner replaces photos"
+drop policy if exists "editors replace photos" on storage.objects;
+create policy "editors replace photos"
   on storage.objects for update to authenticated
-  using (bucket_id = 'piece-photos' and public.is_owner());
+  using (bucket_id = 'piece-photos' and public.is_editor());
 
-drop policy if exists "owner removes photos" on storage.objects;
-create policy "owner removes photos"
+drop policy if exists "editors remove photos" on storage.objects;
+create policy "editors remove photos"
   on storage.objects for delete to authenticated
-  using (bucket_id = 'piece-photos' and public.is_owner());
+  using (bucket_id = 'piece-photos' and public.is_editor());

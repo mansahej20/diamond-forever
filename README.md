@@ -19,14 +19,37 @@ the single dependency and loads from a CDN.
 
 ## Who can do what
 
-Row-level security, not UI, decides this:
+Row-level security decides this, not the interface:
 
 - **Anyone** may read the catalogue and see the photographs. It is a shop window.
-- **Only the owner** — the address in `OWNER_EMAIL` and in `is_owner()` — may
-  add, edit or delete pieces.
+- **Only listed editors** may add, edit or delete pieces.
 
-Changing the owner means changing it in **both** `config.js` and
-`supabase/schema.sql`, then re-applying the schema.
+"Listed" means the address appears in the `public.editors` table. Having a
+Supabase account is not enough on its own — so even if sign-ups are ever left
+open, a stranger who registers still cannot touch the catalogue.
+
+### Adding someone who can edit
+
+Two steps, both in the Supabase dashboard:
+
+1. **Authentication → Users → Add user.** Give them an email and a password,
+   and tick *Auto Confirm User* so they can sign in straight away.
+2. **SQL Editor**, to put that address on the allowlist:
+
+   ```sql
+   insert into public.editors (email, note)
+   values ('them@example.com', 'what they do')
+   on conflict (email) do nothing;
+   ```
+
+### Removing someone
+
+```sql
+delete from public.editors where email = 'them@example.com';
+```
+
+They keep their account but lose the ability to change anything. Delete the
+user under Authentication → Users to stop them signing in at all.
 
 ## Adding a piece
 
