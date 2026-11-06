@@ -21,12 +21,14 @@ create index if not exists pieces_line_created_idx on public.pieces (line, creat
 alter table public.pieces enable row level security;
 
 -- Who counts as the owner. Kept in one function so the address lives in exactly
--- one place; change it here and every policy follows.
+-- one place; change it here and every policy follows. SECURITY INVOKER: it only
+-- compares the caller's own JWT email to a constant, so it needs no elevated
+-- rights, and definer rights here would be surface for nothing.
 create or replace function public.is_owner()
 returns boolean
 language sql
 stable
-security definer
+security invoker
 set search_path = ''
 as $$
   select coalesce(auth.jwt() ->> 'email', '') = 'mansahej3009@gmail.com';
