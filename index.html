@@ -2077,6 +2077,48 @@ function wireAuth(){
   });
 }
 
+/* ============================ boot the backend ============================ */
+function connect(){
+  var cfg = window.DF_CONFIG || {};
+  var hasSupabase = cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY
+                 && typeof window.supabase !== "undefined";
+
+  if (hasSupabase){
+    sbClient = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+    Backend = supabaseBackend(sbClient);
+    wireAuth();
+    sbClient.auth.onAuthStateChange(function(){ settleAuth(); });
+    settleAuth();
+    reloadCatalogue();
+    return;
+  }
+
+  /* Opened as a claude.ai artifact instead of the deployed app. */
+  if (typeof window.claude !== "undefined" && window.claude && window.claude.use){
+    Promise.all([
+      window.claude.use("db").then(null, function(){ return null; }),
+      window.claude.use("assets").then(null, function(){ return null; }),
+      window.claude.use("user").then(null, function(){ return null; })
+    ]).then(function(r){
+      if (!r[0]){
+        dbErrorMsg = "<b>Saving isn’t available in this view.</b>";
+        afterAuth();
+        return;
+      }
+      Backend = claudeBackend(r[0], r[1]);
+      var told = (r[2] && typeof r[2].canEdit === "function") ? r[2].canEdit() : null;
+      canEdit = (told === null || told === undefined) ? true : !!told;
+      afterAuth();
+      reloadCatalogue();
+    });
+    return;
+  }
+
+  dbErrorMsg = "<b>Saving isn’t available here.</b> The catalogue needs its "
+    + "backend configured — see README.md.";
+  afterAuth();
+}
+
 /* Signed in is not the same as allowed to edit: the database decides, through
    the editors allowlist. Ask it rather than trusting anything in the browser. */
 function settleAuth(){
