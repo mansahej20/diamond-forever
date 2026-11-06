@@ -434,6 +434,28 @@ a{color:inherit}
   color:var(--ink-3); padding:3px 0; cursor:pointer;
 }
 .samplebar button:hover{color:var(--ink); border-bottom-color:var(--ink)}
+.signin{
+  position:fixed; inset:0; z-index:50; display:flex;
+  align-items:center; justify-content:center; padding:24px;
+  background:rgba(14,14,14,.55);
+}
+.signin-card{
+  width:100%; max-width:360px; background:var(--ground);
+  border:1px solid var(--rule); padding:28px;
+  display:flex; flex-direction:column; gap:16px;
+}
+.signin-card h2{
+  font-family:var(--display); font-weight:200; font-size:22px; margin:0;
+  letter-spacing:.2em; text-transform:uppercase;
+}
+.signin-lead{margin:0; font-size:13px; line-height:1.6; color:var(--ink-3)}
+.signin-msg{
+  margin:0; font-size:13px; line-height:1.6; color:var(--ink);
+  border-left:2px solid var(--ink); padding-left:12px;
+}
+.signin-actions{display:flex; gap:10px; margin-top:4px}
+.signin-actions .btn{flex:1; text-align:center}
+
 .detail-actions{
   display:flex; gap:16px; align-items:center; flex-wrap:wrap;
   margin-top:48px; padding-top:28px; border-top:1px solid var(--rule);
@@ -586,6 +608,23 @@ a{color:inherit}
       </div>
     </form>
   </section>
+
+  <div class="signin" id="signin" hidden>
+    <form class="signin-card" id="signinForm">
+      <h2>Sign in</h2>
+      <p class="signin-lead">Only listed editors can change the catalogue.
+      Everyone else can browse it.</p>
+      <label class="field"><span>Email</span>
+        <input id="siEmail" type="email" autocomplete="username" required></label>
+      <label class="field"><span>Password</span>
+        <input id="siPass" type="password" autocomplete="current-password" required></label>
+      <p class="signin-msg" id="siMsg" hidden></p>
+      <div class="signin-actions">
+        <button type="submit" class="btn btn-primary" id="siGo">Sign in</button>
+        <button type="button" class="btn" id="siCancel">Cancel</button>
+      </div>
+    </form>
+  </div>
 
   <input type="file" id="pick" accept="image/*,video/*" multiple hidden>
 
@@ -1175,7 +1214,7 @@ function renderDetailActions(kind, p){
       + 'photographs, details and specification. Delete lives there too.</p>';
   } else {
     detailActions.innerHTML =
-      '<a class="btn" href="#/new">Add your own piece</a>'
+      (canEdit ? '<a class="btn" href="#/new">Add your own piece</a>' : '')
       + '<p><b>' + esc(p.name) + '</b> is one of the modelled sample pieces, so it '
       + 'has no details to edit. Pieces you add can be edited any time.</p>';
   }

@@ -1,7 +1,7 @@
 /* Cache the shell so the catalogue opens instantly and survives a dead signal.
    Photographs and catalogue rows are NEVER cached here: they come from Supabase
    and must stay live, or an edit on one device would look lost on another. */
-const SHELL = "df-shell-v1";
+const SHELL = "df-shell-v2";
 const FILES = [
   "./", "./index.html", "./config.js", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"
