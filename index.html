@@ -1071,7 +1071,13 @@ function goFrame(i){
 }
 
 /* ============================ modes ============================ */
-var HINTS = {
+var TOUCH = matchMedia("(pointer: coarse)").matches;
+var HINTS = TOUCH ? {
+  model:"Drag to turn · pinch to zoom · double-tap to reset",
+  spin:"Drag across to spin · pinch to zoom",
+  snap:"Drag or tap the dots · pinch to zoom",
+  still:"Pinch to zoom · double-tap to reset"
+} : {
   model:"Drag to turn · scroll to zoom · double-click to reset",
   spin:"Drag across to spin · scroll to zoom",
   snap:"Drag or tap the dots to change angle · scroll to zoom",
@@ -2076,12 +2082,50 @@ function afterAuth(){
 
 /* ============================ interaction ============================ */
 var drag = null;
+var touches = {};      /* every pointer currently down, by id */
+var pinch = null;      /* {gap, dist0, zoom0} while two fingers are down */
+
+function livePointers(){
+  var out = [];
+  for (var k in touches) if (Object.prototype.hasOwnProperty.call(touches, k)) out.push(touches[k]);
+  return out;
+}
+function gapBetween(a, b){
+  var dx = a.x - b.x, dy = a.y - b.y;
+  return Math.sqrt(dx*dx + dy*dy) || 1;
+}
+
 stageEl.addEventListener("pointerdown", function(e){
-  stageEl.setPointerCapture(e.pointerId);
-  drag = { x:e.clientX, y:e.clientY, f:frame };
+  try { stageEl.setPointerCapture(e.pointerId); } catch (_){}
+  touches[e.pointerId] = { x:e.clientX, y:e.clientY };
   autoSpin = false;
+  var live = livePointers();
+  if (live.length === 1){
+    drag = { x:e.clientX, y:e.clientY, f:frame };
+  } else if (live.length === 2){
+    pinch = { gap:gapBetween(live[0], live[1]), dist0:dist, zoom0:zoom };
+    drag = null;                        /* a pinch is not a turn */
+  }
 });
 stageEl.addEventListener("pointermove", function(e){
+  var t = touches[e.pointerId];
+  if (t){ t.x = e.clientX; t.y = e.clientY; }
+
+  if (pinch){
+    var live = livePointers();
+    if (live.length < 2) return;
+    var k = gapBetween(live[0], live[1]) / pinch.gap;
+    if (mode === "model"){
+      /* fingers apart means closer to the piece, so the distance divides */
+      dist = Math.max(fitDist*0.42, Math.min(fitDist*1.9, pinch.dist0 / k));
+      renderNow();
+    } else {
+      zoom = Math.max(1, Math.min(5, pinch.zoom0 * k));
+      paintFlat();
+    }
+    return;
+  }
+
   if (!drag) return;
   var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
   if (mode === "model"){
@@ -2101,11 +2145,29 @@ stageEl.addEventListener("pointermove", function(e){
   }
 });
 function endDrag(e){
-  if (drag && e){ try { stageEl.releasePointerCapture(e.pointerId); } catch(_){} }
-  drag = null;
+  if (e){
+    delete touches[e.pointerId];
+    try { stageEl.releasePointerCapture(e.pointerId); } catch (_){}
+  } else {
+    touches = {};
+  }
+  var live = livePointers();
+  if (live.length < 2) pinch = null;
+  if (!live.length){
+    drag = null;
+  } else if (!pinch){
+    /* a finger lifted out of a pinch: re-baseline so the piece doesn't jump */
+    drag = { x:live[0].x, y:live[0].y, f:frame };
+  }
 }
 stageEl.addEventListener("pointerup", endDrag);
 stageEl.addEventListener("pointercancel", endDrag);
+
+/* iOS Safari fires its own non-standard pinch events that would zoom the whole
+   page out from under the viewer. We handle the gesture ourselves. */
+["gesturestart", "gesturechange", "gestureend"].forEach(function(ev){
+  stageEl.addEventListener(ev, function(e){ e.preventDefault(); }, { passive:false });
+});
 stageEl.addEventListener("wheel", function(e){
   e.preventDefault(); autoSpin = false;
   if (mode === "model"){
